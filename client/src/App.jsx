@@ -5,8 +5,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<h1>Home</h1>} />
-        <Route path="/canvas" element={<CanvasPage />} />
+        <Route path="/canvas" element={<h1>Home</h1>} />
+        <Route path="/" element={<CanvasPage />} />
       </Routes>
     </Router>
   );
