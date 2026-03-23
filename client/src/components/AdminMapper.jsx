@@ -84,14 +84,7 @@ export default function AdminMapper() {
         const gridX = Math.floor(x / CELL_SIZE);
         const gridY = Math.floor(y / CELL_SIZE);
         const cellKey = `${gridX},${gridY}`;
-
-        // if square isn't already painted, add it to state
-        if (!paintedCells.has(cellKey)) {
-            setPaintedCells(prev => new Set(prev).add(cellKey));
-        }
-    };
-
-
+ 
     // paint vs erase
     if (mode === "paint") {
          // Add the coordinate to the Set
@@ -108,7 +101,9 @@ export default function AdminMapper() {
                 });
             }
         }
+
     };
+
 
         const handleSave = () => {
         if (!pmId) {
@@ -139,7 +134,40 @@ export default function AdminMapper() {
 
     return (
         <div style={{ padding: "20px", backgroundColor: "#121212", color: "white", minHeight: "100vh" }}>
-            <h2>Admin Mapper</h2>
+             <div style={{ marginBottom: "15px", display: "flex", gap: "20px", alignItems: "center" }}>
+                <div>
+                    <label style={{ marginRight: "10px", fontWeight: "bold" }}>PM ID:</label>
+                    <input 
+                        type="text" 
+                        value={pmId} 
+                        onChange={(e) => setPmId(e.target.value)} 
+                        placeholder="e.g., T4-HVAC-01"
+                        style={{ padding: "5px", borderRadius: "4px", border: "1px solid #555" }}
+                    />
+                </div>
+
+                <div>
+                    <button 
+                        onClick={() => setMode("paint")}
+                        style={{ padding: "5px 15px", marginRight: "5px", backgroundColor: mode === "paint" ? "#007AFF" : "#444", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                    >
+                        Paint Mode
+                    </button>
+                    <button 
+                        onClick={() => setMode("erase")}
+                        style={{ padding: "5px 15px", backgroundColor: mode === "erase" ? "#ff453a" : "#444", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                    >
+                        Erase Mode
+                    </button>
+                </div>
+
+                <button 
+                    onClick={handleSave}
+                    style={{ padding: "5px 20px", backgroundColor: "#34C759", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", marginLeft: "auto" }}
+                >
+                    Save Area
+                </button>
+            </div>
             
             <canvas
                 ref={canvasRef}
