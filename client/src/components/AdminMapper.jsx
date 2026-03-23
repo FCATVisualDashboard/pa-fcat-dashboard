@@ -91,14 +91,14 @@ export default function AdminMapper() {
     return (
         <div style={{ padding: "20px", backgroundColor: "#121212", color: "white", minHeight: "100vh" }}>
             <h2>Admin Mapper</h2>
-            <p>Cells Painted: {paintedCells.size}</p> {/* track progress */}
             
             <canvas
                 ref={canvasRef}
                 style={{
                     border: "2px solid #ff453a",
                     width: "100%",
-                    maxWidth: "1000px",
+                    height: "auto",
+                    objectFit: "contain",
                     cursor: "crosshair"
                 }}
                 //event listeners
