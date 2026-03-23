@@ -7,6 +7,9 @@ export default function AdminMapper() {
     const [paintedCells, setPaintedCells] = useState(new Set());
     const [isPainting, setIsPainting] = useState(false);
 
+    const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
+    const [pmId, setPmId] = useState("");      // Tracks the text in the input box
+
     const CELL_SIZE = 20;
     const COLS = 192;
     const ROWS = 108;
@@ -87,6 +90,52 @@ export default function AdminMapper() {
             setPaintedCells(prev => new Set(prev).add(cellKey));
         }
     };
+
+
+    // paint vs erase
+    if (mode === "paint") {
+         // Add the coordinate to the Set
+        if (!paintedCells.has(cellKey)) {
+                setPaintedCells(prev => new Set(prev).add(cellKey));
+            }
+        } else if (mode === "erase") {
+            // Remove the coordinate from the Set
+            if (paintedCells.has(cellKey)) {
+                setPaintedCells(prev => {
+                    const nextSet = new Set(prev);
+                    nextSet.delete(cellKey);
+                    return nextSet;
+                });
+            }
+        }
+    };
+
+        const handleSave = () => {
+        if (!pmId) {
+            alert("Please enter a PM ID before saving!");
+            return;
+        }
+        if (paintedCells.size === 0) {
+            alert("Please paint some cells on the map before saving!");
+            return;
+        }
+
+        // convert the React Set into a standard array for the db
+        const payload = {
+            pm_id: pmId,
+            coordinates: Array.from(paintedCells)
+        };
+
+        // for testing: output the exact JSON we will eventually send to the backend
+        console.log("READY TO SEND TO DATABASE:", JSON.stringify(payload, null, 2));
+        alert(`Successfully mapped ${paintedCells.size} cells to ${pmId}. Check the console!`);
+        
+        // clear the board after saving so you can map the next area
+        setPaintedCells(new Set());
+        setPmId("");
+    };
+
+
 
     return (
         <div style={{ padding: "20px", backgroundColor: "#121212", color: "white", minHeight: "100vh" }}>
