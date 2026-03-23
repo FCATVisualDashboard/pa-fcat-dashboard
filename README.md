@@ -68,12 +68,6 @@ Run both SQL files in pgAdmin using the Query Tool:
 1. `server/database/db.sql` — creates the tables
 2. `server/database/seed.sql` — loads sample data for development
 
-### 3. Starting the Server
-```
-cd server
-npm install
-npm run dev
-```
 
 You should see both of these lines in your terminal:
 ```
@@ -81,7 +75,7 @@ Server running on port 3001
 Database connected: <timestamp>
 ```
 
-### 4. Verify It's Working
+### 3. Verify It's Working
 Visit these URLs in your browser to confirm the API is responding:
 - `http://localhost:3001/api/status` — server health check
 - `http://localhost:3001/api/areas` — returns all PM zones
