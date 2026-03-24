@@ -1,20 +1,46 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config()
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const express = require('express')
+const cors = require('cors')
+const pool = require('./database/pool')
 
-// Middleware
-app.use(cors()); // Allows React app to make requests to this API
-app.use(express.json()); // Allows  server to accept JSON data
+const app = express()
+app.use(cors())
+app.use(express.json())
 
-// Test route
-app.get('/api/test', (req, res) => {
-  res.json({ message: "The JFK FCAT Express server is actively running!" });
-});
+// Test DB connection
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Database connection failed:', err)
+  } else {
+    console.log('Database connected:', res.rows[0].now)
+  }
+})
 
-// Start the server
+// Routes
+app.get('/api/status', (req, res) => {
+  res.json({ status: 'ok' })
+})
+
+app.get('/api/areas', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM areas')
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/workorders', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM work_order')
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
