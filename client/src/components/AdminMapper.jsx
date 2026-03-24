@@ -3,6 +3,7 @@ import aerialImg from "../assets/aerial.jpg";
 
 export default function AdminMapper() {
     const canvasRef = useRef(null);
+    const imageRef = useRef(null);
 
     const [paintedCells, setPaintedCells] = useState(new Set());
     const [isPainting, setIsPainting] = useState(false);
@@ -16,9 +17,21 @@ export default function AdminMapper() {
     const CANVAS_WIDTH = CELL_SIZE * COLS;
     const CANVAS_HEIGHT = CELL_SIZE * ROWS;
 
+    useEffect(() => {
+        const img = new Image();
+        img.src = aerialImg;
+
+        img.onload = () => {
+            imageRef.current = img;
+            draw();
+        }
+    }, []);
+
     const draw = () => {
         const canvas = canvasRef.current;
-        if (!canvas) return; // Safety check
+        const img = imageRef.current;
+
+        if (!canvas || !img) return; // Safety check
         const ctx = canvas.getContext('2d');
 
         canvas.width = CANVAS_WIDTH;
@@ -27,37 +40,34 @@ export default function AdminMapper() {
         ctx.fillStyle = "#1e1e1e";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const img = new Image();
-        img.src = aerialImg;
 
-        img.onload = () => {
-            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-            const imgWidth = img.width * scale;
-            const imgHeight = img.height * scale;
-            const offsetX = (canvas.width - imgWidth) / 2;
-            const offsetY = (canvas.height - imgHeight) / 2;
+        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        const imgWidth = img.width * scale;
+        const imgHeight = img.height * scale;
+        const offsetX = (canvas.width - imgWidth) / 2;
+        const offsetY = (canvas.height - imgHeight) / 2;
 
-            ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+        ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
 
             // draw the painted cells over the map!
-            ctx.fillStyle = "rgba(255, 69, 58, 0.7)"; // Translucent Red
-            paintedCells.forEach(cellKey => {
-                // cellKey looks like "12,5" (x, y). split it back into numbers.
-                const [gridX, gridY] = cellKey.split(',').map(Number);
-                // draw a 20x20 square exactly at that coordinate
-                ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            });
+        ctx.fillStyle = "rgba(255, 69, 58, 0.7)"; // Translucent Red
+        paintedCells.forEach(cellKey => {
+             // cellKey looks like "12,5" (x, y). split it back into numbers.
+             const [gridX, gridY] = cellKey.split(',').map(Number);
+             // draw a 20x20 square exactly at that coordinate
+            ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        });
 
-            // draw the grid overlay
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"; 
-            ctx.lineWidth = 1;
-            for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-            }
-            for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-            }
-        };
+        // draw the grid overlay
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
+             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+         }
+
     };
 
     // run the draw function once on load, AND anytime 'paintedCells' changes
@@ -137,11 +147,11 @@ export default function AdminMapper() {
              <div style={{ marginBottom: "15px", display: "flex", gap: "20px", alignItems: "center" }}>
                 <div>
                     <label style={{ marginRight: "10px", fontWeight: "bold" }}>PM ID:</label>
-                    <input 
+                    <input
                         type="text" 
-                        value={pmId} 
+                        value={pmId}
                         onChange={(e) => setPmId(e.target.value)} 
-                        placeholder="e.g., T4-HVAC-01"
+                        placeholder="e.g., 6671234"
                         style={{ padding: "5px", borderRadius: "4px", border: "1px solid #555" }}
                     />
                 </div>
@@ -161,22 +171,22 @@ export default function AdminMapper() {
                     </button>
                 </div>
 
-                <button 
+                <button
                     onClick={handleSave}
                     style={{ padding: "5px 20px", backgroundColor: "#34C759", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", marginLeft: "auto" }}
                 >
                     Save Area
                 </button>
             </div>
-            
+
             <canvas
                 ref={canvasRef}
                 style={{
                     border: "2px solid #ff453a",
                     width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                    cursor: "crosshair"
+                    height: "75vh",
+                    aspectRatio: "16 / 9",
+                    cursor: mode === "paint" ? "crosshair" : "cell"
                 }}
                 //event listeners
                 onMouseDown={(e) => { setIsPainting(true); handlePaint(e); }}
