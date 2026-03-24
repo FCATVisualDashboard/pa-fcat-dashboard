@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import jfkImg from "../assets/jfk.png";
+import aerialImg from "../assets/aerial.jpg";
 
 export default function AdminMapper() {
     const canvasRef = useRef(null);
@@ -28,7 +28,7 @@ export default function AdminMapper() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const img = new Image();
-        img.src = jfkImg;
+        img.src = aerialImg;
 
         img.onload = () => {
             const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
