@@ -27,6 +27,12 @@ export default function AdminMapper() {
         }
     }, []);
 
+    useEffect(() => {
+        if (paintedCells.size === 0 && mode === "erase") {
+            setMode("paint");
+        }
+    }, [paintedCells.size, mode]);
+
     const draw = () => {
         const canvas = canvasRef.current;
         const img = imageRef.current;
@@ -41,7 +47,7 @@ export default function AdminMapper() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 
-        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
         const imgWidth = img.width * scale;
         const imgHeight = img.height * scale;
         const offsetX = (canvas.width - imgWidth) / 2;
@@ -114,8 +120,14 @@ export default function AdminMapper() {
 
     };
 
+    const handleClearAll = () => {
+        if (window.confirm("Are you sure you want to clear all painted cells?")) {
+            setPaintedCells(new Set());
+            setMode("paint"); 
+        }
+    };
 
-        const handleSave = () => {
+    const handleSave = () => {
         if (!pmId) {
             alert("Please enter a PM ID before saving!");
             return;
@@ -163,12 +175,22 @@ export default function AdminMapper() {
                     >
                         Paint Mode
                     </button>
-                    <button 
-                        onClick={() => setMode("erase")}
-                        style={{ padding: "5px 15px", backgroundColor: mode === "erase" ? "#ff453a" : "#444", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
-                    >
-                        Erase Mode
-                    </button>
+                    {paintedCells.size > 0 && (
+                        <>
+                            <button 
+                                onClick={() => setMode("erase")}
+                                style={{ padding: "5px 15px", marginRight: "5px", backgroundColor: mode === "erase" ? "#ff453a" : "#444", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                            >
+                                Erase Mode
+                            </button>
+                            <button 
+                                onClick={handleClearAll}
+                                style={{ padding: "5px 15px", backgroundColor: "#ff9f0a", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                            >
+                                Clear All
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 <button
@@ -184,9 +206,9 @@ export default function AdminMapper() {
                 style={{
                     border: "2px solid #ff453a",
                     width: "100%",
-                    height: "75vh",
                     aspectRatio: "16 / 9",
-                    cursor: mode === "paint" ? "crosshair" : "cell"
+                    cursor: mode === "paint" ? "crosshair" : "cell",
+                    display: "block",
                 }}
                 //event listeners
                 onMouseDown={(e) => { setIsPainting(true); handlePaint(e); }}
