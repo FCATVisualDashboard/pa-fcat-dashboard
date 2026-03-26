@@ -20,7 +20,7 @@ export default function AdminMapper() {
 
     const fetchSavedGrids = async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/grid/all");
+            const response = await fetch("http://localhost:5001/api/grid/all");
             if (response.ok) {
                 const data = await response.json();
                 setSavedAreas(data); // save the database rows to React state
@@ -162,7 +162,7 @@ export default function AdminMapper() {
 
         try {
             // send the new data to PostgreSQL
-            const response = await fetch("http://localhost:5000/api/grid/save", {
+            const response = await fetch("http://localhost:5001/api/grid/save", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
