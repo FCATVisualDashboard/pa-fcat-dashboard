@@ -51,7 +51,7 @@ export default function AdminMapper() {
         const canvas = canvasRef.current;
         const img = imageRef.current;
 
-        if (!canvas || !img) return; // Safety check
+        if (!canvas || !img) return; // safety check
         const ctx = canvas.getContext('2d');
 
         canvas.width = CANVAS_WIDTH;
@@ -75,7 +75,7 @@ export default function AdminMapper() {
             ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         });
 
-        // Draw the active painted cells over top (in translucent red)
+        // draw the active painted cells over top (in translucent red)
         ctx.fillStyle = "rgba(255, 69, 58, 0.7)"; 
         paintedCells.forEach(cellKey => {
             const [gridX, gridY] = cellKey.split(',').map(Number);
@@ -144,7 +144,7 @@ export default function AdminMapper() {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!pmId) {
             alert("Please enter a PM ID before saving!");
             return;
