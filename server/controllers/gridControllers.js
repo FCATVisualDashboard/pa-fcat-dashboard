@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const pool = require('../config/pool');
 
 exports.saveGridArea = async (req, res) => {
     const { pm_id, coordinates } = req.body;

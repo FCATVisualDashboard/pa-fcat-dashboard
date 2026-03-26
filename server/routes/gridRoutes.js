@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const gridController = require('../controllers/gridController');
+const gridController = require('../controllers/gridControllers');
 
 // POST request to save data
 router.post('/save', gridController.saveGridArea);
