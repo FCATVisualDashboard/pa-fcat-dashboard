@@ -41,6 +41,7 @@ exports.saveGridArea = async (req, res) => {
         }
 
         await client.query('COMMIT'); 
+        console.log("Saved coordinates:", coordinates.length, "rows for PM:", pm_id);
         res.status(200).json({ message: "Area successfully mapped and saved." });
 
     } catch (error) {
