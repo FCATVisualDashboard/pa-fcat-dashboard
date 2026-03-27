@@ -2,11 +2,16 @@ require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
-const pool = require('./database/pool')
+const pool = require('./config/pool')
 
 const app = express()
+const PORT = process.env.PORT || 5001;
+
 app.use(cors())
 app.use(express.json())
+
+const gridRoutes = require('./routes/gridRoutes');
+app.use('/api/grid', gridRoutes);
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {
@@ -40,7 +45,6 @@ app.get('/api/workorders', async (req, res) => {
   }
 })
 
-const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
