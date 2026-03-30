@@ -1,10 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import jfkImg from "../assets/aerial.jpg";
+import { STATUS_COLORS } from "../colorMap";
 
 function CanvasPage() {
   const canvasRef = useRef(null);
+  const imgRef = useRef(null);
+  const [dashboardData, setDashboardData] = useState({ cells: [], centers: [] });
 
-  const draw = (canvas, ctx, img) => {
+  useEffect(() => {
+    fetch("http://localhost:5001/api/dashboard")
+      .then(res => res.json())
+      .then(data => setDashboardData(data))
+      .catch(err => console.error("Failed to fetch dashboard data:", err))
+  }, []);
+
+  const draw = (canvas, ctx, img, data) => {
     const CELL_SIZE = 20;
     const COLS = 192;
     const ROWS = 108;
@@ -23,23 +33,51 @@ function CanvasPage() {
 
     ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
 
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    // draw colored grid cells per status
+    data.cells.forEach(cell => {
+      const color = STATUS_COLORS[cell.status] || STATUS_COLORS.GRAY;
+      ctx.fillStyle = color + "99" // "99" adds ~60% opacity in hex
+      ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+    })
+
+    // draw grid lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
     ctx.lineWidth = 1;
-
     for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
     }
 
-    for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
+    // draw labels over each zone center
+    ctx.font = "bold 22px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    data.centers.forEach(zone => {
+      const x = zone.center_x * CELL_SIZE;
+      const y = zone.center_y * CELL_SIZE;
+      const color = STATUS_COLORS[zone.status] || STATUS_COLORS.GRAY;
+
+      const textWidth = ctx.measureText(zone.description).width;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(canvas.width, y);
-      ctx.stroke();
-    }
+      ctx.roundRect(x - textWidth / 2 - 8, y - 14, textWidth + 16, 28, 6);
+      ctx.fill();
+
+      ctx.fillStyle = color;
+      ctx.fillText(zone.description, x, y);
+    });
   };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const img = imgRef.current;
+    if (!canvas || !img) return;
+    const ctx = canvas.getContext("2d");
+    draw(canvas, ctx, img, dashboardData);
+  }, [dashboardData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -49,10 +87,14 @@ function CanvasPage() {
     img.src = jfkImg;
 
     img.onload = () => {
-      draw(canvas, ctx, img);
+      imgRef.current = img;
+      draw(canvas, ctx, img, dashboardData);
     };
 
-    const handleResize = () => draw(canvas, ctx, img);
+    const handleResize = () => {
+      if (imgRef.current) draw(canvas, ctx, imgRef.current, dashboardData);
+    };
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -64,8 +106,6 @@ function CanvasPage() {
       display: "flex",
       flexDirection: "column",
     }}>
-
-      {/* Navbar placeholder */}
       <div style={{
         height: "60px",
         backgroundColor: "#1a1a1a",
@@ -80,13 +120,7 @@ function CanvasPage() {
         </span>
       </div>
 
-      {/* Canvas container */}
-      <div style={{
-        flex: 1,
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-      }}>
+      <div style={{ flex: 1, padding: "20px" }}>
         <canvas
           ref={canvasRef}
           style={{
@@ -97,7 +131,6 @@ function CanvasPage() {
           }}
         />
       </div>
-
     </div>
   );
 }
