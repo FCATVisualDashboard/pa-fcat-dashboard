@@ -1,11 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import jfkImg from "../assets/aerial.jpg";
+import '../navbar.css'
 import { STATUS_COLORS } from "../colorMap";
 
 function CanvasPage() {
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
   const [dashboardData, setDashboardData] = useState({ cells: [], centers: [] });
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const lastRefreshed = "Today at 6:00 AM";
+  const complianceData = {
+    total: 24,
+    completed: 18,
+    approved: 3,
+    unapproved: 2,
+    overdue: 1,
+  };
+  const compliancePct = Math.round((complianceData.completed / complianceData.total) * 100);
 
   useEffect(() => {
     fetch("http://localhost:5001/api/dashboard")
@@ -36,9 +54,9 @@ function CanvasPage() {
     // draw colored grid cells per status
     data.cells.forEach(cell => {
       const color = STATUS_COLORS[cell.status] || STATUS_COLORS.GRAY;
-      ctx.fillStyle = color + "99" // "99" adds ~60% opacity in hex
-      ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-    })
+      ctx.fillStyle = color + "99";
+      ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    });
 
     // draw grid lines
     ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
@@ -106,20 +124,56 @@ function CanvasPage() {
       display: "flex",
       flexDirection: "column",
     }}>
-      <div style={{
-        height: "60px",
-        backgroundColor: "#1a1a1a",
-        borderBottom: "1px solid #333",
-        display: "flex",
-        alignItems: "center",
-        padding: "0 20px",
-        flexShrink: 0,
-      }}>
-        <span style={{ color: "white", fontWeight: "bold", fontSize: "18px" }}>
-          JFK FCAT PM Dashboard
-        </span>
-      </div>
 
+      <div style={{
+  backgroundColor: "#1a1a1a",
+  borderBottom: "1px solid #333",
+  flexShrink: 0,
+  height: "50px",
+}}>
+  <nav className="navbar" role="navigation">
+    <div className="navbar-left">
+      <a href="/">JFK FCAT PM Dashboard</a>
+    </div>
+    <div className="navbar-center">
+      <ul>
+        <li>
+          <span className="navbar-stat">
+            <span className="navbar-stat-label">Last Refreshed:</span>
+            <span className="navbar-stat-value">{lastRefreshed}</span>
+          </span>
+        </li>
+        <li>
+          <span className="navbar-stat">
+            <span className="navbar-stat-label">Compliance:</span>
+            <span className="navbar-stat-value" style={{ color: compliancePct >= 80 ? '#34C759' : compliancePct >= 50 ? '#FF9F0A' : '#FF3B30' }}>
+              {compliancePct}%
+            </span>
+          </span>
+        </li>
+        {/* <li>
+          <span className="navbar-stat">
+            <span className="navbar-stat-label">Overdue:</span>
+            <span className="navbar-stat-value" style={{ color: complianceData.overdue > 0 ? '#FF3B30' : '#34C759' }}>
+              {complianceData.overdue}
+            </span>
+          </span>
+        </li> */}
+      </ul>
+    </div>
+    <div className="navbar-right">
+      <span className="navbar-stat">
+        <span className="navbar-stat-label">
+          {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        </span>
+        <span className="navbar-stat-value">
+          {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
+      </span>
+    </div>
+  </nav>
+</div>
+      {/* Canvas */}
       <div style={{ flex: 1, padding: "20px" }}>
         <canvas
           ref={canvasRef}
@@ -131,6 +185,7 @@ function CanvasPage() {
           }}
         />
       </div>
+
     </div>
   );
 }
