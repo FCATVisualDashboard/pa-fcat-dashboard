@@ -7,7 +7,12 @@ const pool = require('./config/pool')
 const app = express()
 const PORT = process.env.PORT || 5001;
 
-app.use(cors())
+app.use(cors({
+  origin: [
+    'https://pa-fcat-dashboard.vercel.app',
+    'http://localhost:5173'  // for local dev
+  ]
+}));
 app.use(express.json())
 
 const gridRoutes = require('./routes/gridRoutes');
@@ -99,4 +104,6 @@ app.get('/api/dashboard', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
-})
+});
+
+module.exports = app;

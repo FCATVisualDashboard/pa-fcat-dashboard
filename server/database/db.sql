@@ -5,10 +5,11 @@ CREATE TABLE areas (
 );
 
 CREATE TABLE grid (
-    grid_id VARCHAR(50) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     x_pos INTEGER,
     y_pos INTEGER,
-    pm_id VARCHAR(50) REFERENCES areas(pm_id)
+    pm_id VARCHAR(50) REFERENCES areas(pm_id),
+    UNIQUE (pm_id, x_pos, y_pos)
 );
 
 CREATE TABLE work_order (

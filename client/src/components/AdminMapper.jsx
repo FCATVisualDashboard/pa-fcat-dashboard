@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import aerialImg from "../assets/aerial.jpg";
+import API_BASE_URL from '../config';
 
 export default function AdminMapper() {
   const canvasRef = useRef(null);
