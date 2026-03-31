@@ -1,34 +1,44 @@
 import { useRef, useEffect, useState } from "react";
 import aerialImg from "../assets/aerial.jpg";
-import API_BASE_URL from '../config';
+import API_BASE_URL from "../config";
 
 export default function AdminMapper() {
-    const canvasRef = useRef(null);
-    const imageRef = useRef(null);
+  const canvasRef = useRef(null);
+  const imageRef = useRef(null);
 
-    const [paintedCells, setPaintedCells] = useState(new Set());
-    const [isPainting, setIsPainting] = useState(false);
-    const [savedAreas, setSavedAreas] = useState([]);
+  const [paintedCells, setPaintedCells] = useState(new Set());
+  const [isPainting, setIsPainting] = useState(false);
+  const [savedAreas, setSavedAreas] = useState([]);
 
-    const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
-    const [pmId, setPmId] = useState("");      // Tracks the text in the input box
+  const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
+  const [pmId, setPmId] = useState(""); // Tracks the text in the input box
 
-    const CELL_SIZE = 20;
-    const COLS = 854;
-    const ROWS = 480;
-    const CANVAS_WIDTH = CELL_SIZE * COLS;
-    const CANVAS_HEIGHT = CELL_SIZE * ROWS;
+  const CELL_SIZE = 20;
+  const COLS = 854;
+  const ROWS = 480;
+  const CANVAS_WIDTH = CELL_SIZE * COLS;
+  const CANVAS_HEIGHT = CELL_SIZE * ROWS;
 
-    const fetchSavedGrids = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/grid/all`);
-            if (response.ok) {
-                const data = await response.json();
-                setSavedAreas(data); // save the database rows to React state
-            }
-        } catch (error) {
-            console.error("Error fetching saved grids:", error);
-        }
+  const fetchSavedGrids = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/grid/all`);
+      if (response.ok) {
+        const data = await response.json();
+        setSavedAreas(data); // save the database rows to React state
+      }
+    } catch (error) {
+      console.error("Error fetching saved grids:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedGrids(); // load saved areas from the database when the component mounts
+    const img = new Image();
+    img.src = aerialImg;
+
+    img.onload = () => {
+      imageRef.current = img;
+      draw();
     };
   }, []);
 
@@ -166,7 +176,7 @@ export default function AdminMapper() {
 
     try {
       // send the new data to PostgreSQL
-      const response = await fetch("http://localhost:5001/api/grid/save", {
+      const response = await fetch(`${API_BASE_URL}/api/grid/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
