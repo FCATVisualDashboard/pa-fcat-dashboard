@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import aerialImg from "../assets/aerial.jpg";
+import API_BASE_URL from '../config';
 
 export default function AdminMapper() {
     const canvasRef = useRef(null);
@@ -7,6 +8,7 @@ export default function AdminMapper() {
 
     const [paintedCells, setPaintedCells] = useState(new Set());
     const [isPainting, setIsPainting] = useState(false);
+    const [savedAreas, setSavedAreas] = useState([]);
 
     const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
     const [pmId, setPmId] = useState("");      // Tracks the text in the input box
@@ -17,7 +19,20 @@ export default function AdminMapper() {
     const CANVAS_WIDTH = CELL_SIZE * COLS;
     const CANVAS_HEIGHT = CELL_SIZE * ROWS;
 
+    const fetchSavedGrids = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/grid/all`);
+            if (response.ok) {
+                const data = await response.json();
+                setSavedAreas(data); // save the database rows to React state
+            }
+        } catch (error) {
+            console.error("Error fetching saved grids:", error);
+        }
+    };
+
     useEffect(() => {
+        fetchSavedGrids(); // load saved areas from the database when the component mounts
         const img = new Image();
         img.src = aerialImg;
 
@@ -37,7 +52,7 @@ export default function AdminMapper() {
         const canvas = canvasRef.current;
         const img = imageRef.current;
 
-        if (!canvas || !img) return; // Safety check
+        if (!canvas || !img) return; // safety check
         const ctx = canvas.getContext('2d');
 
         canvas.width = CANVAS_WIDTH;
@@ -55,31 +70,34 @@ export default function AdminMapper() {
 
         ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
 
-            // draw the painted cells over the map!
-        ctx.fillStyle = "rgba(255, 69, 58, 0.7)"; // Translucent Red
+        // draw the saved database cells first (in translucent blue)
+        ctx.fillStyle = "rgba(10, 132, 255, 0.5)"; 
+        savedAreas.forEach(cell => {
+            ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        });
+
+        // draw the active painted cells over top (in translucent red)
+        ctx.fillStyle = "rgba(255, 69, 58, 0.7)"; 
         paintedCells.forEach(cellKey => {
-             // cellKey looks like "12,5" (x, y). split it back into numbers.
-             const [gridX, gridY] = cellKey.split(',').map(Number);
-             // draw a 20x20 square exactly at that coordinate
+            const [gridX, gridY] = cellKey.split(',').map(Number);
             ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         });
 
-        // draw the grid overlay
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"; 
         ctx.lineWidth = 1;
         for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
             ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
         }
         for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
-             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-         }
-
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
     };
 
-    // run the draw function once on load, AND anytime 'paintedCells' changes
+    // re-draw the canvas if either the painted cells or the saved database cells change
+
     useEffect(() => {
         draw();
-    }, [paintedCells]);
+    }, [paintedCells, savedAreas]);
 
     const handlePaint = (e) => {
         if (!isPainting) return; // only draw if the mouse button is held down
@@ -100,7 +118,7 @@ export default function AdminMapper() {
         const gridX = Math.floor(x / CELL_SIZE);
         const gridY = Math.floor(y / CELL_SIZE);
         const cellKey = `${gridX},${gridY}`;
- 
+
     // paint vs erase
     if (mode === "paint") {
          // Add the coordinate to the Set
@@ -127,7 +145,7 @@ export default function AdminMapper() {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!pmId) {
             alert("Please enter a PM ID before saving!");
             return;
@@ -143,13 +161,30 @@ export default function AdminMapper() {
             coordinates: Array.from(paintedCells)
         };
 
-        // for testing: output the exact JSON we will eventually send to the backend
-        console.log("READY TO SEND TO DATABASE:", JSON.stringify(payload, null, 2));
-        alert(`Successfully mapped ${paintedCells.size} cells to ${pmId}. Check the console!`);
-        
-        // clear the board after saving so you can map the next area
-        setPaintedCells(new Set());
-        setPmId("");
+        try {
+            // send the new data to PostgreSQL
+            const response = await fetch(`${API_BASE_URL}/api/grid/save`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error("Failed to save to database");
+
+            const data = await response.json();
+            alert(`Success: ${data.message} (${paintedCells.size} cells)`);
+            
+            // refresh the saved data from the database so the red cells turn blue
+            fetchSavedGrids();
+
+            setPaintedCells(new Set());
+            setPmId("");
+            setMode("paint");
+
+        } catch (error) {
+            console.error("Error saving area:", error);
+            alert("There was an error saving the area. Check your terminal for backend errors.");
+        }
     };
 
 
