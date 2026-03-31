@@ -12,8 +12,8 @@ export default function AdminMapper() {
     const [pmId, setPmId] = useState("");      // Tracks the text in the input box
 
     const CELL_SIZE = 20;
-    const COLS = 192;
-    const ROWS = 108;
+    const COLS = 854;
+    const ROWS = 480;
     const CANVAS_WIDTH = CELL_SIZE * COLS;
     const CANVAS_HEIGHT = CELL_SIZE * ROWS;
 
