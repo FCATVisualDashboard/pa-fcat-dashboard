@@ -1,7 +1,7 @@
 const pool = require('../config/pool');
 
 exports.saveGridArea = async (req, res) => {
-    const { pm_id, coordinates } = req.body;
+    const { pm_id, description, coordinates } = req.body;
 
     if (!pm_id || !coordinates || !Array.isArray(coordinates)) {
         return res.status(400).json({ error: "Missing or invalid PM ID and coordinates." });
@@ -14,9 +14,9 @@ exports.saveGridArea = async (req, res) => {
 
         // ensure the PM ID exists in the areas table first
         await client.query(
-            `INSERT INTO areas (pm_id, description) VALUES ($1, $2) ON CONFLICT (pm_id) DO NOTHING`,
-            [pm_id, `Mapped area for ${pm_id}`]
-        );
+    `INSERT INTO areas (pm_id, description) VALUES ($1, $2) ON CONFLICT (pm_id) DO UPDATE SET description = EXCLUDED.description`,
+    [pm_id, description || `Mapped area for ${pm_id}`]
+);
 
         // wipe the slate clean for this specific PM ID to prevent overlapping ghost data
         await client.query(`DELETE FROM grid WHERE pm_id = $1`, [pm_id]);

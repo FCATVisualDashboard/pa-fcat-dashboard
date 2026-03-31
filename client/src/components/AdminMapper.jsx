@@ -170,6 +170,7 @@ export default function AdminMapper() {
     // convert the React Set into a standard array for the db
     const payload = {
       pm_id: pmId,
+      description: description,
       coordinates: Array.from(paintedCells),
     };
 
@@ -191,6 +192,7 @@ export default function AdminMapper() {
 
       setPaintedCells(new Set());
       setPmId("");
+      setDescription("");
       setMode("paint");
     } catch (error) {
       console.error("Error saving area:", error);
@@ -230,6 +232,23 @@ export default function AdminMapper() {
               padding: "5px",
               borderRadius: "4px",
               border: "1px solid #555",
+            }}
+          />
+        </div>
+        <div>
+          <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+            Location Name:
+          </label>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="e.g., Terminal 4 - Main Hall"
+            style={{
+              padding: "5px",
+              borderRadius: "4px",
+              border: "1px solid #555",
+              width: "250px",
             }}
           />
         </div>
