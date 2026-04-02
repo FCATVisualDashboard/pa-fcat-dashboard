@@ -9,7 +9,7 @@ export default function AdminMapper() {
   const [paintedCells, setPaintedCells] = useState(new Set());
   const [isPainting, setIsPainting] = useState(false);
   const [savedAreas, setSavedAreas] = useState([]);
-
+  const [description, setDescription] = useState(""); 
   const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
   const [pmId, setPmId] = useState(""); // Tracks the text in the input box
 
