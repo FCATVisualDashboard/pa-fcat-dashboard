@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import jfkImg from "../assets/aerial.jpg";
 import '../navbar.css'
+import API_BASE_URL from "../config";
 import { STATUS_COLORS } from "../colorMap";
 
 function CanvasPage() {
@@ -26,13 +27,16 @@ function CanvasPage() {
   const compliancePct = Math.round((complianceData.completed / complianceData.total) * 100);
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/dashboard")
+    fetch(`${API_BASE_URL}/api/dashboard`)
       .then(res => res.json())
       .then(data => setDashboardData(data))
       .catch(err => console.error("Failed to fetch dashboard data:", err))
   }, []);
 
   const draw = (canvas, ctx, img, data) => {
+    if (!data || !data.cells || !data.centers){
+      return;
+    }
     const CELL_SIZE = 20;
     const COLS = 192;
     const ROWS = 108;
