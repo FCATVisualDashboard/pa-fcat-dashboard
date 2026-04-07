@@ -10,6 +10,10 @@ function CanvasPage() {
   const [dashboardData, setDashboardData] = useState({ cells: [], centers: [] });
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // state for tooltip hover info
+  const [cellMap, setCellMap] = useState(new Map());
+  const [hoverInfo, setHoverInfo] = useState(null);
+
   // update clock every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -29,7 +33,18 @@ function CanvasPage() {
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/dashboard`)
       .then(res => res.json())
-      .then(data => setDashboardData(data))
+      .then(data => {
+        setDashboardData(data);
+
+        const map = new Map();
+        if (data.cells) {
+          data.cells.forEach(cell => {
+            map.set(`${cell.x_pos},${cell.y_pos}`, cell);
+          });
+        }
+        setCellMap(map);
+      })
+
       .catch(err => console.error("Failed to fetch dashboard data:", err))
   }, []);
 
@@ -121,6 +136,38 @@ function CanvasPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleMouseMove = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    // convert mouse position to internal 4K canvas coordinates
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    // snap to the nearest grid cell
+    const gridX = Math.floor(x / CELL_SIZE);
+    const gridY = Math.floor(y / CELL_SIZE);
+    
+    // check if we have data for this specific grid coordinate
+    const cellData = cellMap.get(`${gridX},${gridY}`);
+
+    if (cellData) {
+      // offset the tooltip slightly so it doesn't get covered by the cursor
+      setHoverInfo({
+        x: e.clientX + 15,
+        y: e.clientY + 15,
+        data: cellData
+      });
+    } else {
+      // clear the tooltip if hovering over an empty part of the map
+      setHoverInfo(null);
+    }
+  };
+
   return (
     <div style={{
       backgroundColor: "#121212",
@@ -186,9 +233,54 @@ function CanvasPage() {
             width: "100%",
             aspectRatio: "16 / 9",
             border: "2px solid #ff453a",
+            cursor: hoverInfo ? "pointer" : "default" // Change cursor if hovering a zone
           }}
+
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setHoverInfo(null)}
         />
       </div>
+
+      {/* Tooltip */}
+      {hoverInfo && hoverInfo.data && (
+        <div style={{
+          position: "fixed",
+          left: hoverInfo.x,
+          top: hoverInfo.y,
+          backgroundColor: "rgba(20, 20, 20, 0.95)",
+          border: `1px solid ${STATUS_COLORS[hoverInfo.data.status] || '#555'}`,
+          borderRadius: "8px",
+          padding: "12px 16px",
+          color: "#fff",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          pointerEvents: "none", // Ensures the tooltip doesn't block mouse events
+          zIndex: 1000,
+          minWidth: "200px"
+        }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: "16px", borderBottom: "1px solid #444", paddingBottom: "6px" }}>
+            {hoverInfo.data.pm_id}
+          </h4>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#aaa" }}>Status:</span>
+              <span style={{ fontWeight: "bold", color: STATUS_COLORS[hoverInfo.data.status] || '#fff' }}>
+                {hoverInfo.data.status || 'N/A'}
+              </span>
+            </div>
+            
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#aaa" }}>Due Date:</span>
+              <span>
+                {hoverInfo.data.target_start_date 
+                  ? new Date(hoverInfo.data.target_start_date).toLocaleDateString() 
+                  : 'Unscheduled'}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
