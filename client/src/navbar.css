@@ -20,17 +20,37 @@
 .navbar a {
   text-decoration: none;
   color: white;
-  font-size: 14px;
+  font-size: 15px;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.navbar a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #eeff00;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease-in-out;
 }
 
 .navbar a:hover {
-  color: #ff453a;
+  color: #eeff00;
+}
+
+.navbar a:hover::after {
+  transform: scaleX(0.7);
 }
 
 .navbar-left a {
   font-weight: bold;
-  font-size: 15px;
+  font-size: 16px;
   white-space: nowrap;
+  letter-spacing: 0.5px;
 }
 
 .navbar-right {
@@ -43,20 +63,21 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .navbar-stat-label {
   font-size: 11px;
-  color: #888;
+  color: #aaaaaa;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   white-space: nowrap;
 }
 
 .navbar-stat-value {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
-  color: white;
+  color: #ffffff;
   white-space: nowrap;
+  letter-spacing: 0.3px;
 }
