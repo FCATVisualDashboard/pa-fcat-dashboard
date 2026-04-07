@@ -5,6 +5,7 @@ import API_BASE_URL from "../config";
 export default function AdminMapper() {
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
+  const lastDrawRef = useRef(null);
 
   const [paintedCells, setPaintedCells] = useState(new Set());
   const [isPainting, setIsPainting] = useState(false);
@@ -13,7 +14,7 @@ export default function AdminMapper() {
   const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
   const [pmId, setPmId] = useState(""); // Tracks the text in the input box
 
-  const CELL_SIZE = 20;
+  const CELL_SIZE = 4;
   const COLS = 854;
   const ROWS = 480;
   const CANVAS_WIDTH = CELL_SIZE * COLS;
@@ -90,7 +91,7 @@ export default function AdminMapper() {
       ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     });
 
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
     ctx.lineWidth = 1;
     for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
       ctx.beginPath();
@@ -112,42 +113,77 @@ export default function AdminMapper() {
     draw();
   }, [paintedCells, savedAreas]);
 
-  const handlePaint = (e) => {
-    if (!isPainting) return; // only draw if the mouse button is held down
-
+  // helper function to convert raw mouse coordinates into grid coordinates
+  const getGridCoordinates = (e) => {
     const canvas = canvasRef.current;
-    // getBoundingClientRect tells how big the canvas is on your specific laptop screen
     const rect = canvas.getBoundingClientRect();
-
-    // calculate the difference between your laptop screen size and the 4K internal size
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    // apply that scale to the exact pixel clicked
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
 
-    // snap that raw pixel down to the nearest 20px grid bucket
-    const gridX = Math.floor(x / CELL_SIZE);
-    const gridY = Math.floor(y / CELL_SIZE);
-    const cellKey = `${gridX},${gridY}`;
+    return {
+      gridX: Math.floor(x / CELL_SIZE),
+      gridY: Math.floor(y / CELL_SIZE)
+    };
+  };
 
-    // paint vs erase
-    if (mode === "paint") {
-      // Add the coordinate to the Set
-      if (!paintedCells.has(cellKey)) {
-        setPaintedCells((prev) => new Set(prev).add(cellKey));
-      }
-    } else if (mode === "erase") {
-      // Remove the coordinate from the Set
-      if (paintedCells.has(cellKey)) {
-        setPaintedCells((prev) => {
-          const nextSet = new Set(prev);
-          nextSet.delete(cellKey);
-          return nextSet;
-        });
-      }
+  // Bresenham's line algorithm to get all cells between two points for smoother drawing
+  const getCellsOnLine = (x0, y0, x1, y1) => {
+    const cells = [];
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
+    let sx = x0 < x1 ? 1 : -1;
+    let sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+
+    while (true) {
+      cells.push(`${x0},${y0}`);
+      if (x0 === x1 && y0 === y1) break;
+      let e2 = 2 * err;
+      if (e2 > -dy) { err -= dy; x0 += sx; }
+      if (e2 < dx) { err += dx; y0 += sy; }
     }
+    return cells;
+  };
+
+  const applyPaint = (cellsArray) => {
+    setPaintedCells((prev) => {
+      const nextSet = new Set(prev);
+      cellsArray.forEach(cell => {
+        if (mode === "paint") nextSet.add(cell);
+        else if (mode === "erase") nextSet.delete(cell);
+      });
+      return nextSet;
+    });
+  };
+
+  const startPainting = (e) => {
+    setIsPainting(true);
+    const { gridX, gridY } = getGridCoordinates(e);
+    
+    lastDrawRef.current = { x: gridX, y: gridY }; // record starting point
+    applyPaint([`${gridX},${gridY}`]);            // paint the first dot
+  };
+
+  const drawLine = (e) => {
+    if (!isPainting || !lastDrawRef.current) return;
+    
+    const { gridX, gridY } = getGridCoordinates(e);
+    const { x: startX, y: startY } = lastDrawRef.current;
+    
+    // connect the dots between the last frame and this frame
+    const cellsToUpdate = getCellsOnLine(startX, startY, gridX, gridY);
+    applyPaint(cellsToUpdate);
+    
+    // update the memory for the next frame
+    lastDrawRef.current = { x: gridX, y: gridY };
+  };
+
+  const stopPainting = () => {
+    setIsPainting(false);
+    lastDrawRef.current = null; // clear the memory so lines don't drag across the screen
   };
 
   const handleClearAll = () => {
@@ -328,13 +364,10 @@ export default function AdminMapper() {
           display: "block",
         }}
         //event listeners
-        onMouseDown={(e) => {
-          setIsPainting(true);
-          handlePaint(e);
-        }}
-        onMouseMove={handlePaint}
-        onMouseUp={() => setIsPainting(false)}
-        onMouseLeave={() => setIsPainting(false)} // stop painting if the mouse leaves the box
+        onMouseDown={startPainting}
+        onMouseMove={drawLine}
+        onMouseUp={stopPainting}
+        onMouseLeave={stopPainting}
       />
     </div>
   );
