@@ -170,15 +170,20 @@ function CanvasPage() {
 
   return (
     <div style={{
-      backgroundColor: "#121212",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-    }}>
+  background: 'linear-gradient(to top, #0b0b0b, #333232)',
+  width: '100vw',
+  minHeight: '100vh',    
+  margin: 0,
+  padding: 0,
+  display: 'flex',         
+  flexDirection: 'column', 
+  boxSizing: 'border-box',  
+  overflow: 'auto'          
+}}>
 
       <div style={{
   backgroundColor: "#1a1a1a",
-  borderBottom: "1px solid #333",
+  borderBottom: "2px solid #eeff00",
   flexShrink: 0,
   height: "50px",
 }}>
