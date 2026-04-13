@@ -17,6 +17,7 @@ export default function AdminMapper() {
   const [pmId, setPmId] = useState(""); // Tracks the text in the input box
 
   const [deleteInput, setDeleteInput] = useState("");
+  const [polygonPath, setPolygonPath] = useState([]);
 
   const CELL_SIZE = 4;
   const COLS = 854;
@@ -271,26 +272,77 @@ export default function AdminMapper() {
     }
   };
 
-  const handleCanvasMouseDown = (e) => {
-    if (actionView === "add") {
-      startPainting(e);
-    } else if (actionView === "delete") {
-      // find what they clicked on
-      const { gridX, gridY } = getGridCoordinates(e);
-      const clickedCell = savedAreas.find(c => c.x_pos === gridX && c.y_pos === gridY);
-      
-      if (clickedCell) {
-        executeDelete(clickedCell.pm_id);
-      }
-    }
+const handleCanvasMouseDown = (e) => {
+    if (actionView === "delete") return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const { gridX, gridY } = getGridCoordinates(e);
+
+    setIsPainting(true);
+    setPolygonPath([{ x: gridX, y: gridY }]); // start a brand new path
+    
+    applyPaint([`${gridX},${gridY}`]); 
   };
 
   const handleCanvasMouseMove = (e) => {
-    if (actionView === "add") drawLine(e);
+    if (!isPainting || actionView === "delete") return;
+
+    const { gridX, gridY } = getGridCoordinates(e);
+    const lastPoint = polygonPath[polygonPath.length - 1];
+
+    // only update if we moved to a new cell
+    if (lastPoint && (lastPoint.x !== gridX || lastPoint.y !== gridY)) {
+      setPolygonPath(prev => [...prev, { x: gridX, y: gridY }]); 
+      
+      const cellsToUpdate = getCellsOnLine(lastPoint.x, lastPoint.y, gridX, gridY);
+      applyPaint(cellsToUpdate);
+    }
   };
 
   const handleCanvasMouseUp = () => {
-    if (actionView === "add") stopPainting();
+    if (!isPainting || actionView === "delete") return;
+    setIsPainting(false);
+
+    // If shape (more than 2 points) AND are in paint mode, auto-fill it
+    if (polygonPath.length > 2 && mode === "paint") {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      
+      // build the invisible boundary path
+      const path = new Path2D();
+      path.moveTo(polygonPath[0].x * CELL_SIZE, polygonPath[0].y * CELL_SIZE);
+      for (let i = 1; i < polygonPath.length; i++) {
+        path.lineTo(polygonPath[i].x * CELL_SIZE, polygonPath[i].y * CELL_SIZE);
+      }
+      path.closePath(); 
+
+      // find the bounding box
+      const minX = Math.min(...polygonPath.map(p => p.x));
+      const maxX = Math.max(...polygonPath.map(p => p.x));
+      const minY = Math.min(...polygonPath.map(p => p.y));
+      const maxY = Math.max(...polygonPath.map(p => p.y));
+
+      const filledCells = []; // collect all the inside cells
+
+      // scan every cell inside the bounding box
+      for (let x = minX; x <= maxX; x++) {
+        for (let y = minY; y <= maxY; y++) {
+          const testX = (x * CELL_SIZE) + (CELL_SIZE / 2);
+          const testY = (y * CELL_SIZE) + (CELL_SIZE / 2);
+
+          if (ctx.isPointInPath(path, testX, testY)) {
+            filledCells.push(`${x},${y}`);
+          }
+        }
+      }
+
+      // send the array of filled cells to your applyPaint
+      applyPaint(filledCells);
+    }
+
+    setPolygonPath([]); // reset the tracker for the next drawing
   };
 
   return (
