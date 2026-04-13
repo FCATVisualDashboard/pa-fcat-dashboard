@@ -1,9 +1,22 @@
+```markdown
 # JFK FCAT PM Visualization Dashboard
 
-## Prerequisites
+A full-stack web application designed for the Port Authority of New York and New Jersey to track and manage Preventative Maintenance (PM) zones at JFK airport. It features a custom HTML5 Canvas rendering engine for interactive, spatial data visualization.
 
+##  Key Features
+- **Interactive Map Engine:** Custom-built HTML5 Canvas interface for viewing and interacting with airfield PM zones.
+- **Auto-Fill Tracing Tool:** Built-in admin mapping tool utilizing ray-casting and Bresenham's line algorithms to trace and auto-fill complex polygons.
+- **Dynamic UI:** Slide-out sidebars and hover tooltips for granular zone data without cluttering the map.
+- **RESTful API:** Node.js/Express backend handling spatial data translation and database transactions.
+
+---
+
+## Prerequisites
 - **Node.js (v22.12.0+)**: *Strict requirement for Vite 6+ and backend native watch mode.*
+- **PostgreSQL**: Installed locally with pgAdmin for database management.
 - **Git**
+
+---
 
 ## Installation
 
@@ -17,70 +30,66 @@ cd pa-fcat-dashboard
 # 2. Install backend dependencies
 cd server
 npm install
-npm install pg
 
 # 3. Install frontend dependencies
 cd ../client
 npm install
 ```
-## Running Locally
-The project requires two concurrent terminal sessions to run the frontend and backend simultaneously.
 
-1. Start the Backend API
+---
 
-Bash
-cd server
-npm run dev
-Runs on http://localhost:5000 with native Node watch-mode hot-reloading.
-(Make sure that your using your own unique postgres password in the .env file when accessing data)
-
-2. Start the Frontend UI
-
-Bash
-cd client
-npm run dev
-Runs on http://localhost:5173 with Vite Hot Module Replacement (HMR).
-
-## Backend & Database Setup
+## 🗄️ Backend & Database Setup
 
 ### 1. Environment Variables
-Create a `.env` file inside the `server/` folder. Use this format:
-```
-PORT=3001
-NODE_ENV=development
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=jfk_fcat
-DB_USER=postgres
-DB_PASSWORD=yourPostgresPassword
-```
+Create a `.env` file inside the `server/` folder. Use this unified connection string format:
 
-- **PORT** — the port your Express server runs on
-- **NODE_ENV** — set to `development` while building locally
-- **DB_HOST** — where your database lives (`localhost` means your own machine)
-- **DB_PORT** — PostgreSQL's default port, leave as `5432` unless you changed it during install
-- **DB_NAME** — the name of the database you created in pgAdmin
-- **DB_USER** — your PostgreSQL username, typically `postgres`
-- **DB_PASSWORD** — the password you set when installing PostgreSQL
+```env
+PORT=5001
+NODE_ENV=development
+DATABASE_URL=postgres://YOUR_POSTGRES_USERNAME:YOUR_POSTGRES_PASSWORD@localhost:5432/jfk_fcat
+```
+*(Make sure to replace the username and password with your actual local pgAdmin credentials).*
 
 ### 2. Database Setup
-Run both SQL files in pgAdmin using the Query Tool:
-1. `server/database/db.sql` — creates the tables
-2. `server/database/seed.sql` — loads sample data for development
+Run SQL file in pgAdmin using the Query Tool to initialize your local database:
+ `server/database/db.sql` — creates the necessary tables.
 
+---
 
-You should see both of these lines in your terminal:
+## 💻 Running Locally
+
+The project requires two concurrent terminal sessions to run the frontend and backend simultaneously.
+
+**1. Start the Backend API**
+```bash
+cd server
+npm run dev
 ```
-Server running on port 3001
-Database connected: <timestamp>
+*Runs on `http://localhost:5001` with native Node watch-mode hot-reloading.*
+
+**2. Start the Frontend UI**
+```bash
+cd client
+npm run dev
+```
+*Runs on `http://localhost:5173` with Vite Hot Module Replacement (HMR).*
+
+---
+
+## 🧪 Testing
+
+The backend is fully equipped with an isolated integration testing suite using **Jest** and **Supertest**. The tests intercept database calls using a mock connection pool, ensuring your actual database is never mutated during test runs.
+
+To run the backend test suite:
+```bash
+cd server
+npm test
 ```
 
-### 3. Verify It's Working
-Visit these URLs in your browser to confirm the API is responding:
-- `http://localhost:3001/api/status` — server health check
-- `http://localhost:3001/api/areas` — returns all PM zones
-- `http://localhost:3001/api/workorders` — returns all work orders
-## Project Structure
-/client: React frontend (Vite, HTML5 Canvas rendering, UI components).
+---
 
-/server: Node.js/Express backend (API endpoints, MSSQL integration, data normalization).
+## 📂 Project Structure
+
+- `/client`: React frontend (Vite, HTML5 Canvas engine, interactive UI components).
+- `/server`: Node.js/Express backend (REST API endpoints, PostgreSQL integration, Jest testing suite).
+```
