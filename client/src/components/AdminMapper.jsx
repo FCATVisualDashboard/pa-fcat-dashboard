@@ -7,12 +7,16 @@ export default function AdminMapper() {
   const imageRef = useRef(null);
   const lastDrawRef = useRef(null);
 
+  const [actionView, setActionView] = useState("add"); // "add" or "delete"
+
   const [paintedCells, setPaintedCells] = useState(new Set());
   const [isPainting, setIsPainting] = useState(false);
   const [savedAreas, setSavedAreas] = useState([]);
   const [description, setDescription] = useState(""); 
   const [mode, setMode] = useState("paint"); // Tracks if we are painting or erasing
   const [pmId, setPmId] = useState(""); // Tracks the text in the input box
+
+  const [deleteInput, setDeleteInput] = useState("");
 
   const CELL_SIZE = 4;
   const COLS = 854;
@@ -48,6 +52,14 @@ export default function AdminMapper() {
       setMode("paint");
     }
   }, [paintedCells.size, mode]);
+
+  // if we switch to delete mode, wipe the painted cells so the user can start fresh
+  useEffect(() => {
+    if (actionView === "delete") {
+      setPaintedCells(new Set());
+      setMode("paint");
+    }
+  }, [actionView]);
 
   const draw = () => {
     const canvas = canvasRef.current;
@@ -238,120 +250,127 @@ export default function AdminMapper() {
     }
   };
 
+  const executeDelete = async (targetPmId) => {
+    if (!targetPmId) return alert("Please provide a PM ID to delete.");
+
+    if (window.confirm(`Are you absolutely sure you want to permanently delete the area: ${targetPmId}?`)) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/grid/delete/${targetPmId}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) throw new Error("Failed to delete from database");
+
+        alert(`Successfully deleted ${targetPmId}`);
+        fetchSavedGrids();
+        setDeleteInput("");
+      } catch (error) {
+        console.error("Error deleting area:", error);
+        alert("There was an error deleting the area.");
+      }
+    }
+  };
+
+  const handleCanvasMouseDown = (e) => {
+    if (actionView === "add") {
+      startPainting(e);
+    } else if (actionView === "delete") {
+      // find what they clicked on
+      const { gridX, gridY } = getGridCoordinates(e);
+      const clickedCell = savedAreas.find(c => c.x_pos === gridX && c.y_pos === gridY);
+      
+      if (clickedCell) {
+        executeDelete(clickedCell.pm_id);
+      }
+    }
+  };
+
+  const handleCanvasMouseMove = (e) => {
+    if (actionView === "add") drawLine(e);
+  };
+
+  const handleCanvasMouseUp = () => {
+    if (actionView === "add") stopPainting();
+  };
+
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#121212",
-        color: "white",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          marginBottom: "15px",
-          display: "flex",
-          gap: "20px",
-          alignItems: "center",
-        }}
-      >
-        <div>
-          <label style={{ marginRight: "10px", fontWeight: "bold" }}>
-            PM ID:
-          </label>
-          <input
-            type="text"
-            value={pmId}
-            onChange={(e) => setPmId(e.target.value)}
-            placeholder="e.g., 6671234"
-            style={{
-              padding: "5px",
-              borderRadius: "4px",
-              border: "1px solid #555",
-            }}
-          />
-        </div>
-        <div>
-          <label style={{ marginRight: "10px", fontWeight: "bold" }}>
-            Location Name:
-          </label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g., Terminal 4 - Main Hall"
-            style={{
-              padding: "5px",
-              borderRadius: "4px",
-              border: "1px solid #555",
-              width: "250px",
-            }}
-          />
+    <div style={{ padding: "20px", backgroundColor: "#121212", color: "white", minHeight: "100vh" }}>
+
+      <div style={{
+        display: "flex", 
+        alignItems: "center", 
+        gap: "20px", 
+        marginBottom: "15px", 
+        backgroundColor: "#1a1a1a", 
+        padding: "12px 20px", 
+        borderRadius: "8px", 
+        border: "1px solid #333",
+        boxShadow: "0 4px 6px rgba(0,0,0,0.3)"
+      }}>
+        
+        {/* Segmented Control Switcher */}
+        <div style={{ display: "flex", backgroundColor: "#000", padding: "4px", borderRadius: "6px" }}>
+          <button 
+            onClick={() => setActionView("add")}
+            style={{ padding: "6px 16px", backgroundColor: actionView === "add" ? "#333" : "transparent", color: actionView === "add" ? "white" : "#888", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", transition: "0.2s" }}
+          >
+            Add Area
+          </button>
+          <button 
+            onClick={() => setActionView("delete")}
+            style={{ padding: "6px 16px", backgroundColor: actionView === "delete" ? "#ff453a" : "transparent", color: actionView === "delete" ? "white" : "#888", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", transition: "0.2s" }}
+          >
+            Delete Area
+          </button>
         </div>
 
-        <div>
-          <button
-            onClick={() => setMode("paint")}
-            style={{
-              padding: "5px 15px",
-              marginRight: "5px",
-              backgroundColor: mode === "paint" ? "#007AFF" : "#444",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Paint Mode
-          </button>
-          {paintedCells.size > 0 && (
+        {/* Vertical Divider */}
+        <div style={{ width: "1px", height: "30px", backgroundColor: "#444" }}></div>
+
+        {/* Contextual Controls (Swaps based on the switch) */}
+        <div style={{ display: "flex", flex: 1, alignItems: "center", gap: "15px" }}>
+          {actionView === "add" ? (
             <>
-              <button
-                onClick={() => setMode("erase")}
-                style={{
-                  padding: "5px 15px",
-                  marginRight: "5px",
-                  backgroundColor: mode === "erase" ? "#ff453a" : "#444",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
-                Erase Mode
+              {/* Add Area Controls */}
+              <input type="text" value={pmId} onChange={(e) => setPmId(e.target.value)} placeholder="PM ID (e.g. 6671234)" style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #555", backgroundColor: "#222", color: "white", width: "150px" }} />
+              <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Location Name" style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #555", backgroundColor: "#222", color: "white", width: "200px" }} />
+              
+              <div style={{ display: "flex", gap: "5px", marginLeft: "10px" }}>
+                <button onClick={() => setMode("paint")} style={{ padding: "6px 15px", backgroundColor: mode === "paint" ? "#007AFF" : "#333", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>Paint</button>
+                {paintedCells.size > 0 && (
+                  <>
+                    <button onClick={() => setMode("erase")} style={{ padding: "6px 15px", backgroundColor: mode === "erase" ? "#ff453a" : "#333", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>Erase</button>
+                    <button onClick={handleClearAll} style={{ padding: "6px 15px", backgroundColor: "transparent", color: "#ff9f0a", border: "1px solid #ff9f0a", borderRadius: "4px", cursor: "pointer" }}>Clear All</button>
+                  </>
+                )}
+              </div>
+
+              <button onClick={handleSave} style={{ padding: "8px 20px", backgroundColor: "#34C759", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", marginLeft: "auto" }}>
+                Save Area
               </button>
-              <button
-                onClick={handleClearAll}
-                style={{
-                  padding: "5px 15px",
-                  backgroundColor: "#ff9f0a",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
+            </>
+          ) : (
+            <>
+              {/* Delete Area Controls */}
+              <span style={{ color: "#aaa", fontStyle: "italic" }}>
+                Click a blue area on the map to delete it, or:
+              </span>
+              <input 
+                type="text" 
+                value={deleteInput} 
+                onChange={(e) => setDeleteInput(e.target.value)} 
+                placeholder="Enter PM ID" 
+                style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #555", backgroundColor: "#222", color: "white", marginLeft: "auto" }} 
+              />
+              <button 
+                onClick={() => executeDelete(deleteInput)} 
+                style={{ padding: "6px 15px", backgroundColor: "#ff453a", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
               >
-                Clear All
+                Delete
               </button>
             </>
           )}
         </div>
-
-        <button
-          onClick={handleSave}
-          style={{
-            padding: "5px 20px",
-            backgroundColor: "#34C759",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            marginLeft: "auto",
-          }}
-        >
-          Save Area
-        </button>
       </div>
 
       <canvas
@@ -360,14 +379,14 @@ export default function AdminMapper() {
           border: "2px solid #ff453a",
           width: "100%",
           aspectRatio: "16 / 9",
-          cursor: mode === "paint" ? "crosshair" : "cell",
+          cursor: actionView === "delete" ? "pointer" : (mode === "paint" ? "crosshair" : "cell"),
           display: "block",
+          borderRadius: "4px"
         }}
-        //event listeners
-        onMouseDown={startPainting}
-        onMouseMove={drawLine}
-        onMouseUp={stopPainting}
-        onMouseLeave={stopPainting}
+        onMouseDown={handleCanvasMouseDown}
+        onMouseMove={handleCanvasMouseMove}
+        onMouseUp={handleCanvasMouseUp}
+        onMouseLeave={handleCanvasMouseUp} 
       />
     </div>
   );

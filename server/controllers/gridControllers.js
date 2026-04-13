@@ -66,3 +66,28 @@ exports.getAllGrids = async (req, res) => {
         client.release();
     }
 };
+
+exports.deleteGridArea = async (req, res) => {
+    const { pm_id } = req.params; 
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN'); 
+
+        // delete the individual pixels
+        await client.query(`DELETE FROM grid WHERE pm_id = $1`, [pm_id]);
+
+        // delete the parent record from the areas table
+        await client.query(`DELETE FROM areas WHERE pm_id = $1`, [pm_id]);
+
+        await client.query('COMMIT'); 
+        res.status(200).json({ message: `Successfully deleted area ${pm_id}` });
+
+    } catch (error) {
+        await client.query('ROLLBACK'); 
+        console.error("Database error deleting area:", error);
+        res.status(500).json({ error: "Internal server error while deleting map area." });
+    } finally {
+        client.release(); 
+    }
+};

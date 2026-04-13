@@ -48,13 +48,14 @@ function CanvasPage() {
       .catch(err => console.error("Failed to fetch dashboard data:", err))
   }, []);
 
+  const CELL_SIZE = 20;
+  const COLS = 192;
+  const ROWS = 108;
+
   const draw = (canvas, ctx, img, data) => {
     if (!data || !data.cells || !data.centers){
       return;
     }
-    const CELL_SIZE = 20;
-    const COLS = 192;
-    const ROWS = 108;
 
     canvas.width = COLS * CELL_SIZE;
     canvas.height = ROWS * CELL_SIZE;
