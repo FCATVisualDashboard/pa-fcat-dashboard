@@ -68,7 +68,7 @@ exports.getAllGrids = async (req, res) => {
 };
 
 exports.deleteGridArea = async (req, res) => {
-    const { pm_id } = req.params; 
+    const { pm_id } = req.params;
     const client = await pool.connect();
 
     try {
