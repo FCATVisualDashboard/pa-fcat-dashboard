@@ -51,10 +51,21 @@ function CanvasPage() {
 
       .catch(err => console.error("Failed to fetch dashboard data:", err))
   }, []);
+  useEffect(() => {
+  fetch(`${API_BASE_URL}/api/dashboard`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Dashboard data received:", data);  // Add this
+      console.log("Cells count:", data.cells?.length);  // Add this
+      console.log("Centers count:", data.centers?.length);  // Add this
+      setDashboardData(data);
+    })
+    .catch(err => console.error("Failed to fetch dashboard data:", err))
+}, []);
 
-  const CELL_SIZE = 20;
-  const COLS = 192;
-  const ROWS = 108;
+  const CELL_SIZE = 4;
+  const COLS = 854;
+  const ROWS = 480;
 
   const draw = (canvas, ctx, img, data) => {
     if (!data || !data.cells || !data.centers){
