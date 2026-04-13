@@ -8,4 +8,7 @@ router.post('/save', gridController.saveGridArea);
 // GET request to fetch data
 router.get('/all', gridController.getAllGrids);
 
+// DELETE request to remove data for a specific PM ID
+router.delete('/delete/:pm_id', gridController.deleteGridArea);
+
 module.exports = router;
