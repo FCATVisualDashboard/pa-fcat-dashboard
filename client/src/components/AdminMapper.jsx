@@ -8,6 +8,8 @@ export default function AdminMapper() {
   const lastDrawRef = useRef(null);
 
   const [actionView, setActionView] = useState("add"); // "add" or "delete"
+  const [editingPmId, setEditingPmId] = useState(null); // tracks what we are editing
+
 
   const [paintedCells, setPaintedCells] = useState(new Set());
   const [isPainting, setIsPainting] = useState(false);
@@ -89,6 +91,7 @@ export default function AdminMapper() {
     // draw the saved database cells first (in translucent blue)
     ctx.fillStyle = "rgba(10, 132, 255, 0.5)";
     savedAreas.forEach((cell) => {
+      if (cell.pm_id === editingPmId) return; 
       ctx.fillRect(
         cell.x_pos * CELL_SIZE,
         cell.y_pos * CELL_SIZE,
@@ -224,9 +227,15 @@ export default function AdminMapper() {
     };
 
     try {
-      // send the new data to PostgreSQL
-      const response = await fetch(`${API_BASE_URL}/api/grid/save`, {
-        method: "POST",
+    // dynamically choose between saving a new area or updating an old one
+    const endpoint = editingPmId 
+        ? `${API_BASE_URL}/api/grid/edit/${editingPmId}` 
+        : `${API_BASE_URL}/api/grid/save`;
+        
+      const method = editingPmId ? "PUT" : "POST";
+
+      const response = await fetch(endpoint, {
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -242,6 +251,7 @@ export default function AdminMapper() {
       setPaintedCells(new Set());
       setPmId("");
       setDescription("");
+      setEditingPmId(null);
       setMode("paint");
     } catch (error) {
       console.error("Error saving area:", error);
@@ -273,12 +283,28 @@ export default function AdminMapper() {
   };
 
 const handleCanvasMouseDown = (e) => {
-    if (actionView === "delete") return;
+    // if in edit mode and haven't selected an area yet, pick one up
+    if (actionView === "edit" && !editingPmId) {
+      // find the area they clicked on
+      const clickedCell = savedAreas.find(c => c.x_pos === gridX && c.y_pos === gridY);
+      
+      if (clickedCell) {
+        const targetPmId = clickedCell.pm_id;
+        const cellsForPm = savedAreas.filter(c => c.pm_id === targetPmId);
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+        // load its data into the form
+        setPmId(targetPmId);
+        setDescription(cellsForPm[0].description || "");
+        setEditingPmId(targetPmId); // locks into edit mode for this ID
 
-    const { gridX, gridY } = getGridCoordinates(e);
+        // convert db coordinates back into red painted ink
+        const newPainted = new Set();
+        cellsForPm.forEach(c => newPainted.add(`${c.x_pos},${c.y_pos}`));
+        setPaintedCells(newPainted);
+        setMode("paint");
+      }
+      return; 
+    }
 
     setIsPainting(true);
     setPolygonPath([{ x: gridX, y: gridY }]); // start a brand new path
@@ -367,6 +393,12 @@ const handleCanvasMouseDown = (e) => {
             style={{ padding: "6px 16px", backgroundColor: actionView === "add" ? "#333" : "transparent", color: actionView === "add" ? "white" : "#888", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", transition: "0.2s" }}
           >
             Add Area
+          </button>
+          <button 
+            onClick={() => { setActionView("edit"); setPaintedCells(new Set()); }}
+            style={{ padding: "6px 16px", backgroundColor: actionView === "edit" ? "#007AFF" : "transparent", color: actionView === "edit" ? "white" : "#888", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", transition: "0.2s" }}
+          >
+            Edit Area
           </button>
           <button 
             onClick={() => setActionView("delete")}
