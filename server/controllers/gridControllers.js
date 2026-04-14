@@ -91,3 +91,38 @@ exports.deleteGridArea = async (req, res) => {
         client.release(); 
     }
 };
+
+exports.updateGridArea = async (req, res) => {
+  const targetPmId = req.params.pm_id;
+  const { pm_id, description, coordinates } = req.body;
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN'); 
+
+    // wipe the old cells for this specific PM ID
+    await client.query('DELETE FROM grid_cells WHERE pm_id = $1', [targetPmId]);
+
+    // insert the new cells
+    const insertQuery = `
+      INSERT INTO grid_cells (pm_id, description, x_pos, y_pos)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    for (let coord of coordinates) {
+      const [x, y] = coord.split(',').map(Number);
+      await client.query(insertQuery, [pm_id, description, x, y]);
+    }
+
+    await client.query('COMMIT'); // save changes
+    res.status(200).json({ message: "Area successfully updated!" });
+
+  } catch (error) {
+    await client.query('ROLLBACK'); // undo everything if it fails
+    console.error("Error updating area:", error);
+    res.status(500).json({ error: "Failed to update area" });
+  } finally {
+    client.release();
+  }
+};
