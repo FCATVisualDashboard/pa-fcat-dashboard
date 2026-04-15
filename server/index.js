@@ -1,8 +1,11 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
 const pool = require('./config/pool')
+const sql = require('./config/pool');
+
 
 const app = express()
 const PORT = process.env.PORT || 5001;
@@ -19,13 +22,9 @@ const gridRoutes = require('./routes/gridRoutes');
 app.use('/api/grid', gridRoutes);
 
 // Test DB connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection failed:', err)
-  } else {
-    console.log('Database connected:', res.rows[0].now)
-  }
-})
+sql`SELECT NOW()`
+  .then(res => console.log("Database connected:", res[0]))
+  .catch(err => console.error("Database connection failed:", err));
 
 // Routes
 app.get('/api/status', (req, res) => {

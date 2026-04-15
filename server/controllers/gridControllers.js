@@ -1,128 +1,100 @@
-const pool = require('../config/pool');
+const sql = require('../config/pool');
 
+// ================= SAVE AREA =================
 exports.saveGridArea = async (req, res) => {
     const { pm_id, description, coordinates } = req.body;
+
+    console.log("Coords length:", coordinates?.length);
 
     if (!pm_id || !coordinates || !Array.isArray(coordinates)) {
         return res.status(400).json({ error: "Missing or invalid PM ID and coordinates." });
     }
 
-    const client = await pool.connect();
-
     try {
-        await client.query('BEGIN');
+        // ensure area exists
+        await sql`
+            INSERT INTO areas (pm_id, description)
+            VALUES (${pm_id}, ${description || `Mapped area for ${pm_id}`})
+            ON CONFLICT (pm_id)
+            DO UPDATE SET description = EXCLUDED.description
+        `;
 
-        // ensure the PM ID exists in the areas table first
-        await client.query(
-    `INSERT INTO areas (pm_id, description) VALUES ($1, $2) ON CONFLICT (pm_id) DO UPDATE SET description = EXCLUDED.description`,
-    [pm_id, description || `Mapped area for ${pm_id}`]
-);
+        // clear old grid
+        await sql`DELETE FROM grid WHERE pm_id = ${pm_id}`;
 
-        // wipe the slate clean for this specific PM ID to prevent overlapping ghost data
-        await client.query(`DELETE FROM grid WHERE pm_id = $1`, [pm_id]);
+        // 🔥 safe per-row insert
+        for (let coord of coordinates) {
+            const [x, y] = coord.split(',').map(Number);
+            if (isNaN(x) || isNaN(y)) continue;
 
-        // batch insert all the new coordinates
-        if (coordinates.length > 0) {
-            let queryText = 'INSERT INTO grid (pm_id, x_pos, y_pos) VALUES ';
-            let values = [];
-            let valueIndex = 1;
-
-            coordinates.forEach((coord, i) => {
-                const [x, y] = coord.split(',');
-                queryText += `($${valueIndex++}, $${valueIndex++}, $${valueIndex++})`;
-                if (i < coordinates.length - 1) queryText += ', ';
-                values.push(pm_id, parseInt(x), parseInt(y));
-            });
-
-            // if a duplicate coordinate accidentally slips in, ignore it instead of crashing
-            queryText += ' ON CONFLICT (pm_id, x_pos, y_pos) DO NOTHING';
-
-            await client.query(queryText, values);
+            await sql`
+                INSERT INTO grid (pm_id, x_pos, y_pos)
+                VALUES (${pm_id}, ${x}, ${y})
+                ON CONFLICT (pm_id, x_pos, y_pos) DO NOTHING
+            `;
         }
 
-        await client.query('COMMIT'); 
         console.log("Saved coordinates:", coordinates.length, "rows for PM:", pm_id);
         res.status(200).json({ message: "Area successfully mapped and saved." });
 
     } catch (error) {
-        await client.query('ROLLBACK'); 
         console.error("Database error saving grid:", error);
         res.status(500).json({ error: "Internal server error while saving map." });
-    } finally {
-        client.release(); 
     }
 };
 
-// fetch all saved coordinates
+
+// ================= GET ALL =================
 exports.getAllGrids = async (req, res) => {
-    const client = await pool.connect();
     try {
-        const result = await client.query(`SELECT pm_id, x_pos, y_pos FROM grid`);
-        res.status(200).json(result.rows);
+        const result = await sql`SELECT pm_id, x_pos, y_pos FROM grid`;
+        res.status(200).json(result);
     } catch (error) {
         console.error("Database error fetching grids:", error);
         res.status(500).json({ error: "Internal server error." });
-    } finally {
-        client.release();
     }
 };
 
+
+// ================= DELETE =================
 exports.deleteGridArea = async (req, res) => {
     const { pm_id } = req.params;
-    const client = await pool.connect();
 
     try {
-        await client.query('BEGIN'); 
+        await sql`DELETE FROM grid WHERE pm_id = ${pm_id}`;
+        await sql`DELETE FROM areas WHERE pm_id = ${pm_id}`;
 
-        // delete the individual pixels
-        await client.query(`DELETE FROM grid WHERE pm_id = $1`, [pm_id]);
-
-        // delete the parent record from the areas table
-        await client.query(`DELETE FROM areas WHERE pm_id = $1`, [pm_id]);
-
-        await client.query('COMMIT'); 
         res.status(200).json({ message: `Successfully deleted area ${pm_id}` });
 
     } catch (error) {
-        await client.query('ROLLBACK'); 
         console.error("Database error deleting area:", error);
         res.status(500).json({ error: "Internal server error while deleting map area." });
-    } finally {
-        client.release(); 
     }
 };
 
+
+// ================= UPDATE =================
 exports.updateGridArea = async (req, res) => {
-  const targetPmId = req.params.pm_id;
-  const { pm_id, description, coordinates } = req.body;
+    const targetPmId = req.params.pm_id;
+    const { pm_id, description, coordinates } = req.body;
 
-  const client = await pool.connect();
+    try {
+        await sql`DELETE FROM grid WHERE pm_id = ${targetPmId}`;
 
-  try {
-    await client.query('BEGIN'); 
+        for (let coord of coordinates) {
+            const [x, y] = coord.split(',').map(Number);
+            if (isNaN(x) || isNaN(y)) continue;
 
-    // wipe the old cells for this specific PM ID
-    await client.query('DELETE FROM grid_cells WHERE pm_id = $1', [targetPmId]);
+            await sql`
+                INSERT INTO grid (pm_id, x_pos, y_pos)
+                VALUES (${pm_id}, ${x}, ${y})
+            `;
+        }
 
-    // insert the new cells
-    const insertQuery = `
-      INSERT INTO grid_cells (pm_id, description, x_pos, y_pos)
-      VALUES ($1, $2, $3, $4)
-    `;
+        res.status(200).json({ message: "Area successfully updated!" });
 
-    for (let coord of coordinates) {
-      const [x, y] = coord.split(',').map(Number);
-      await client.query(insertQuery, [pm_id, description, x, y]);
+    } catch (error) {
+        console.error("Error updating area:", error);
+        res.status(500).json({ error: "Failed to update area" });
     }
-
-    await client.query('COMMIT'); // save changes
-    res.status(200).json({ message: "Area successfully updated!" });
-
-  } catch (error) {
-    await client.query('ROLLBACK'); // undo everything if it fails
-    console.error("Error updating area:", error);
-    res.status(500).json({ error: "Failed to update area" });
-  } finally {
-    client.release();
-  }
 };
