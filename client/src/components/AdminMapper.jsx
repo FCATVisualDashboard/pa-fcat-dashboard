@@ -283,6 +283,8 @@ export default function AdminMapper() {
   };
 
 const handleCanvasMouseDown = (e) => {
+    const { gridX, gridY } = getGridCoordinates(e);
+    
     // if in edit mode and haven't selected an area yet, pick one up
     if (actionView === "edit" && !editingPmId) {
       // find the area they clicked on
