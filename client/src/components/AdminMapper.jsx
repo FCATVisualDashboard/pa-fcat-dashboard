@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import aerialImg from "../assets/aerial.jpg";
 import API_BASE_URL from "../config";
+import pmOverlayImg from "../assets/Airfield_PM_Areas.png";
 
 export default function AdminMapper() {
   const canvasRef = useRef(null);
@@ -9,7 +10,6 @@ export default function AdminMapper() {
 
   const [actionView, setActionView] = useState("add"); // "add" or "delete"
   const [editingPmId, setEditingPmId] = useState(null); // tracks what we are editing
-
 
   const [paintedCells, setPaintedCells] = useState(new Set());
   const [isPainting, setIsPainting] = useState(false);
@@ -20,6 +20,27 @@ export default function AdminMapper() {
 
   const [deleteInput, setDeleteInput] = useState("");
   const [polygonPath, setPolygonPath] = useState([]);
+
+  // OVERLAY STATE
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [overlayOpacity, setOverlayOpacity] = useState(0.4);
+  const [overlayRotation, setOverlayRotation] = useState(0);
+  const [overlayOffsetX, setOverlayOffsetX] = useState(0);
+  const [overlayOffsetY, setOverlayOffsetY] = useState(0);
+
+  // OVERLAY INTERACTION TRACKING
+  const [overlayMode, setOverlayMode] = useState("locked"); // "locked", "move", "rotate"
+  const [isRotating, setIsRotating] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // REFS FOR SMOOTH MATH
+  const overlayRef = useRef(null);
+  const overlayStartAngleRef = useRef(0);
+  const overlayInitialRotRef = useRef(0);
+  const overlayStartDragXRef = useRef(0);
+  const overlayStartDragYRef = useRef(0); 
+  const overlayInitialOffsetXRef = useRef(0);
+  const overlayInitialOffsetYRef = useRef(0);
 
   const CELL_SIZE = 4;
   const COLS = 854;
@@ -47,6 +68,14 @@ export default function AdminMapper() {
     img.onload = () => {
       imageRef.current = img;
       draw();
+    };
+
+    const overlay = new Image();
+    overlay.src = pmOverlayImg;
+
+    overlay.onload = () => {
+      overlayRef.current = overlay;
+      draw(); // re-draw in case it loads after the base map
     };
   }, []);
 
@@ -88,6 +117,23 @@ export default function AdminMapper() {
 
     ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
 
+    if (showOverlay && overlayRef.current) {
+      ctx.save(); // save the canvas state before opacity and rotation changes
+      ctx.globalAlpha = overlayOpacity; // make it translucent
+
+      // find the exact center point to rotate around
+      const centerX = offsetX + imgWidth / 2 + overlayOffsetX;
+      const centerY = offsetY + imgHeight / 2 + overlayOffsetY;
+
+      // move the canvas origin to the center, and spin it
+      ctx.translate(centerX, centerY);
+      ctx.rotate((overlayRotation * Math.PI) / 180); // convert degrees to radians
+
+      ctx.drawImage(overlayRef.current, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+
+      ctx.restore(); // snap the canvas back to normal so grid stays straight
+    }
+
     // draw the saved database cells first (in translucent blue)
     ctx.fillStyle = "rgba(10, 132, 255, 0.5)";
     savedAreas.forEach((cell) => {
@@ -120,14 +166,14 @@ export default function AdminMapper() {
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
-    }
+    }  
   };
 
   // re-draw the canvas if either the painted cells or the saved database cells change
 
   useEffect(() => {
     draw();
-  }, [paintedCells, savedAreas]);
+  }, [paintedCells, savedAreas, showOverlay, overlayOpacity, overlayRotation, overlayOffsetX, overlayOffsetY]);
 
   // helper function to convert raw mouse coordinates into grid coordinates
   const getGridCoordinates = (e) => {
@@ -284,7 +330,43 @@ export default function AdminMapper() {
 
 const handleCanvasMouseDown = (e) => {
     const { gridX, gridY } = getGridCoordinates(e);
-    
+
+    // INTERCEPT: Overlay Movement (Dragging)
+    if (showOverlay && overlayMode === "move") {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      setIsDragging(true);
+      overlayStartDragXRef.current = (e.clientX - rect.left) * scaleX;
+      overlayStartDragYRef.current = (e.clientY - rect.top) * scaleY;
+      overlayInitialOffsetXRef.current = overlayOffsetX;
+      overlayInitialOffsetYRef.current = overlayOffsetY;
+      return; 
+    }
+
+    // INTERCEPT: Overlay Rotation
+    if (showOverlay && overlayMode === "rotate") {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+
+      // Center of the canvas 
+      const centerX = (canvas.width / 2) + overlayOffsetX;
+      const centerY = (canvas.height / 2) + overlayOffsetY;
+
+      const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+
+      setIsRotating(true);
+      overlayStartAngleRef.current = angle;
+      overlayInitialRotRef.current = overlayRotation;
+      return; 
+    }
+
     // if in edit mode and haven't selected an area yet, pick one up
     if (actionView === "edit" && !editingPmId) {
       // find the area they clicked on
@@ -315,6 +397,45 @@ const handleCanvasMouseDown = (e) => {
   };
 
   const handleCanvasMouseMove = (e) => {
+    // INTERCEPT: Overlay Movement (Dragging)
+    if (isDragging) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+
+      // Calculate how far the mouse has moved since clicking
+      const dx = mouseX - overlayStartDragXRef.current;
+      const dy = mouseY - overlayStartDragYRef.current;
+
+      setOverlayOffsetX(overlayInitialOffsetXRef.current + dx);
+      setOverlayOffsetY(overlayInitialOffsetYRef.current + dy);
+      return;
+    }
+
+    // INTERCEPT: Overlay Rotation
+    if (isRotating) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+
+      const centerX = (canvas.width / 2) + overlayOffsetX;
+      const centerY = (canvas.height / 2) + overlayOffsetY;
+
+      const currentAngle = Math.atan2(mouseY - centerY, mouseX - centerX);
+      const angleDiff = currentAngle - overlayStartAngleRef.current; 
+      const angleDiffDegrees = angleDiff * (180 / Math.PI);
+      setOverlayRotation(overlayInitialRotRef.current + angleDiffDegrees);
+      return; 
+    }
+
+    if (overlayMode !== "locked") return; // Prevent hover painting while adjusting
+
     if (!isPainting || actionView === "delete") return;
 
     const { gridX, gridY } = getGridCoordinates(e);
@@ -330,6 +451,14 @@ const handleCanvasMouseDown = (e) => {
   };
 
   const handleCanvasMouseUp = () => {
+    if (isRotating || isDragging) {
+      setIsRotating(false);
+      setIsDragging(false);
+      return;
+    }
+
+    if (overlayMode !== "locked") return;
+
     if (!isPainting || actionView === "delete") return;
     setIsPainting(false);
 
@@ -415,7 +544,7 @@ const handleCanvasMouseDown = (e) => {
 
         {/* Contextual Controls (Swaps based on the switch) */}
         <div style={{ display: "flex", flex: 1, alignItems: "center", gap: "15px" }}>
-          {actionView === "add" ? (
+          {actionView === "add" || "edit" ? (
             <>
               {/* Add Area Controls */}
               <input type="text" value={pmId} onChange={(e) => setPmId(e.target.value)} placeholder="PM ID (e.g. 6671234)" style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #555", backgroundColor: "#222", color: "white", width: "150px" }} />
@@ -456,8 +585,73 @@ const handleCanvasMouseDown = (e) => {
               </button>
             </>
           )}
+
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
+          <label style={{ 
+            display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", 
+            fontWeight: "bold", backgroundColor: showOverlay ? "#333" : "#222", 
+            padding: "8px 15px", borderRadius: "6px", border: showOverlay ? "1px solid #007AFF" : "1px solid #444",
+            transition: "0.2s"
+          }}>
+            <input 
+              type="checkbox" 
+              checked={showOverlay} 
+              onChange={(e) => setShowOverlay(e.target.checked)} 
+              style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#007AFF" }}
+            />
+            Blueprint Mode
+          </label>
+        </div>
         </div>
       </div>
+
+     {/* Canvas Container */}
+      <div style={{ position: "relative", width: "100%", borderRadius: "4px", overflow: "hidden", border: "2px solid #ff453a" }}>
+        
+        {/* Floating Overlay Control Panel */}
+        {showOverlay && (
+          <div style={{
+            position: "absolute", top: "20px", right: "20px", 
+            backgroundColor: "rgba(20, 20, 20, 0.85)", backdropFilter: "blur(8px)",
+            padding: "15px", borderRadius: "8px", border: "1px solid #444",
+            color: "white", display: "flex", flexDirection: "column", gap: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.5)", zIndex: 10
+          }}>
+            <h4 style={{ margin: 0, fontSize: "14px", color: "#aaa" }}>Overlay Tools</h4>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <label style={{ fontSize: "12px" }}>Opacity: {Math.round(overlayOpacity * 100)}%</label>
+              <input 
+                type="range" min="0.1" max="1.0" step="0.05" 
+                value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))} 
+                style={{ width: "150px" }}
+              />
+            </div>
+
+            {/* TOOL SELECTOR */}
+            <div style={{ display: "flex", gap: "5px", marginTop: "5px" }}>
+              <button 
+                onClick={() => setOverlayMode("move")}
+                style={{ flex: 1, padding: "8px", borderRadius: "4px", border: "none", cursor: "pointer", backgroundColor: overlayMode === "move" ? "#007AFF" : "#333", color: "white", transition: "0.2s" }}
+              >
+                 Move
+              </button>
+              <button 
+                onClick={() => setOverlayMode("rotate")}
+                style={{ flex: 1, padding: "8px", borderRadius: "4px", border: "none", cursor: "pointer", backgroundColor: overlayMode === "rotate" ? "#007AFF" : "#333", color: "white", transition: "0.2s" }}
+              >
+                 Rotate
+              </button>
+            </div>
+            
+            <button 
+              onClick={() => setOverlayMode("locked")}
+              style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "none", fontWeight: "bold", cursor: "pointer", backgroundColor: overlayMode === "locked" ? "#34C759" : "#444", color: "white", transition: "0.2s" }}
+            >
+               {overlayMode === "locked" ? "Locked (Ready to Paint)" : "Unlocked"}
+            </button>
+          </div>
+        )}
 
       <canvas
         ref={canvasRef}
@@ -465,8 +659,7 @@ const handleCanvasMouseDown = (e) => {
           border: "2px solid #ff453a",
           width: "100%",
           aspectRatio: "16 / 9",
-          cursor: actionView === "delete" ? "pointer" : (mode === "paint" ? "crosshair" : "cell"),
-          display: "block",
+          cursor: isRotating || isDragging ? "grabbing" : (overlayMode === "move" || overlayMode === "rotate" ? "grab" : (actionView === "delete" ? "pointer" : (mode === "paint" ? "crosshair" : "cell"))),
           borderRadius: "4px"
         }}
         onMouseDown={handleCanvasMouseDown}
@@ -474,6 +667,7 @@ const handleCanvasMouseDown = (e) => {
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseUp} 
       />
+    </div>
     </div>
   );
 }
