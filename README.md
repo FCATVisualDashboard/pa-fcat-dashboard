@@ -1,4 +1,3 @@
-```markdown
 # JFK FCAT PM Visualization Dashboard
 
 A full-stack web application designed for the Port Authority of New York and New Jersey to track and manage Preventative Maintenance (PM) zones at JFK airport. It features a custom HTML5 Canvas rendering engine for interactive, spatial data visualization.
