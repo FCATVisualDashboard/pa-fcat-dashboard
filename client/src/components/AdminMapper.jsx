@@ -355,7 +355,6 @@ const handleCanvasMouseDown = (e) => {
       const mouseX = (e.clientX - rect.left) * scaleX;
       const mouseY = (e.clientY - rect.top) * scaleY;
 
-      // Center of the canvas 
       const centerX = (canvas.width / 2) + overlayOffsetX;
       const centerY = (canvas.height / 2) + overlayOffsetY;
 
@@ -367,34 +366,72 @@ const handleCanvasMouseDown = (e) => {
       return; 
     }
 
-    // if in edit mode and haven't selected an area yet, pick one up
+    // DELETE: click on or near a blue area to delete it
+    if (actionView === "delete") {
+      const TOLERANCE = 2;
+      const clickedCell = savedAreas.find(c => 
+        Math.abs(c.x_pos - gridX) <= TOLERANCE && 
+        Math.abs(c.y_pos - gridY) <= TOLERANCE
+      );
+      if (clickedCell) {
+        executeDelete(clickedCell.pm_id);
+      }
+      return; // never paint in delete mode
+    }
+
+    // EDIT: click to select an area first, then allow painting
     if (actionView === "edit" && !editingPmId) {
-      // find the area they clicked on
-      const clickedCell = savedAreas.find(c => c.x_pos === gridX && c.y_pos === gridY);
-      
+      const TOLERANCE = 2;
+      const clickedCell = savedAreas.find(c => 
+        Math.abs(c.x_pos - gridX) <= TOLERANCE && 
+        Math.abs(c.y_pos - gridY) <= TOLERANCE
+      );
       if (clickedCell) {
         const targetPmId = clickedCell.pm_id;
         const cellsForPm = savedAreas.filter(c => c.pm_id === targetPmId);
-
-        // load its data into the form
         setPmId(targetPmId);
-        setDescription(cellsForPm[0].description || "");
-        setEditingPmId(targetPmId); // locks into edit mode for this ID
-
-        // convert db coordinates back into red painted ink
+        setDescription(cellsForPm[0]?.description || "");
+        setEditingPmId(targetPmId);
         const newPainted = new Set();
         cellsForPm.forEach(c => newPainted.add(`${c.x_pos},${c.y_pos}`));
         setPaintedCells(newPainted);
         setMode("paint");
       }
-      return; 
+      return; // don't start painting until area is selected
     }
+
+
+    // if in edit mode and haven't selected an area yet, pick one up
+    if (actionView === "edit" && !editingPmId) {
+      const clickedCell = savedAreas.find(c => c.x_pos === gridX && c.y_pos === gridY);
+      if (clickedCell) {
+        const targetPmId = clickedCell.pm_id;
+        const cellsForPm = savedAreas.filter(c => c.pm_id === targetPmId);
+        setPmId(targetPmId);
+        setDescription(cellsForPm[0]?.description || "");
+        setEditingPmId(targetPmId);
+        const newPainted = new Set();
+        cellsForPm.forEach(c => newPainted.add(`${c.x_pos},${c.y_pos}`));
+        setPaintedCells(newPainted);
+        setMode("paint");
+      }
+      return; // don't start painting until area is selected
+    }
+
 
     setIsPainting(true);
     setPolygonPath([{ x: gridX, y: gridY }]); // start a brand new path
     
     applyPaint([`${gridX},${gridY}`]); 
   };
+  useEffect(() => {
+  if (actionView !== "edit") {
+    setEditingPmId(null);
+    setPaintedCells(new Set());
+    setPmId("");
+    setDescription("");
+  }
+}, [actionView]);
 
   const handleCanvasMouseMove = (e) => {
     // INTERCEPT: Overlay Movement (Dragging)
@@ -544,7 +581,7 @@ const handleCanvasMouseDown = (e) => {
 
         {/* Contextual Controls (Swaps based on the switch) */}
         <div style={{ display: "flex", flex: 1, alignItems: "center", gap: "15px" }}>
-          {actionView === "add" || "edit" ? (
+         {actionView === "add" || actionView === "edit" ? (
             <>
               {/* Add Area Controls */}
               <input type="text" value={pmId} onChange={(e) => setPmId(e.target.value)} placeholder="PM ID (e.g. 6671234)" style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #555", backgroundColor: "#222", color: "white", width: "150px" }} />
