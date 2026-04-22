@@ -27,79 +27,71 @@ sql`SELECT NOW()`
   .catch(err => console.error("Database connection failed:", err));
 
 // Routes
-app.get('/api/status', (req, res) => {
-  res.json({ status: 'ok' })
-})
 
+// Areas route
 app.get('/api/areas', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM areas')
-    res.json(result.rows)
+    const result = await sql`SELECT * FROM areas`;
+    res.json(result);
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
+// Work orders route
 app.get('/api/workorders', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM work_order')
-    res.json(result.rows)
+    const result = await sql`SELECT * FROM work_order`;
+    res.json(result);
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
+
+// Centers route
 app.get('/api/grid/centers', async (req, res) => {
-    try {
-        const result = await pool.query(`
-            SELECT 
-                g.pm_id,
-                a.description,
-                ROUND(AVG(g.x_pos)) AS center_x,
-                ROUND(AVG(g.y_pos)) AS center_y
-            FROM grid g
-            JOIN areas a ON g.pm_id = a.pm_id
-            GROUP BY g.pm_id, a.description
-        `)
-        res.json(result.rows)
-    } catch (err) {
-        res.status(500).json({ error: err.message })
-    }
-})
+  try {
+    const result = await sql`
+      SELECT g.pm_id, a.description,
+        ROUND(AVG(g.x_pos)) AS center_x,
+        ROUND(AVG(g.y_pos)) AS center_y
+      FROM grid g
+      JOIN areas a ON g.pm_id = a.pm_id
+      GROUP BY g.pm_id, a.description
+    `;
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Dashboard route
 app.get('/api/dashboard', async (req, res) => {
-    try {
-        // all grid cells with their area's status and description
-        const gridResult = await pool.query(`
-            SELECT 
-                g.x_pos,
-                g.y_pos,
-                g.pm_id,
-                a.description,
-                a.status
-            FROM grid g
-            JOIN areas a ON g.pm_id = a.pm_id
-        `)
+  try {
+    const cells = await sql`
+      SELECT g.pm_id, g.x_pos, g.y_pos, a.description,
+        w.status, w.target_start_date, w.frequency
+      FROM grid g
+      LEFT JOIN areas a ON g.pm_id = a.pm_id
+      LEFT JOIN work_order w ON g.pm_id = w.pm_id
+    `;
 
-        // center point per zone for label placement
-        const centerResult = await pool.query(`
-            SELECT
-                g.pm_id,
-                a.description,
-                a.status,
-                ROUND(AVG(g.x_pos)) AS center_x,
-                ROUND(AVG(g.y_pos)) AS center_y
-            FROM grid g
-            JOIN areas a ON g.pm_id = a.pm_id
-            GROUP BY g.pm_id, a.description, a.status
-        `)
+    const centers = await sql`
+      SELECT g.pm_id, a.description, w.status,
+        ROUND(AVG(g.x_pos)) AS center_x,
+        ROUND(AVG(g.y_pos)) AS center_y
+      FROM grid g
+      LEFT JOIN areas a ON g.pm_id = a.pm_id
+      LEFT JOIN work_order w ON g.pm_id = w.pm_id
+      GROUP BY g.pm_id, a.description, w.status
+    `;
 
-        res.json({
-            cells: gridResult.rows,
-            centers: centerResult.rows
-        })
-    } catch (err) {
-        res.status(500).json({ error: err.message })
-    }
-})
+    res.json({ cells, centers });
+  } catch (err) {
+    console.error('Dashboard error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
