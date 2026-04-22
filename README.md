@@ -33,6 +33,7 @@ npm install
 # 3. Install frontend dependencies
 cd ../client
 npm install
+npm install @neondatabase/serverless
 ```
 
 ---
