@@ -51,17 +51,7 @@ function CanvasPage() {
 
       .catch(err => console.error("Failed to fetch dashboard data:", err))
   }, []);
-  useEffect(() => {
-  fetch(`${API_BASE_URL}/api/dashboard`)
-    .then(res => res.json())
-    .then(data => {
-      console.log("Dashboard data received:", data);  // Add this
-      console.log("Cells count:", data.cells?.length);  // Add this
-      console.log("Centers count:", data.centers?.length);  // Add this
-      setDashboardData(data);
-    })
-    .catch(err => console.error("Failed to fetch dashboard data:", err))
-}, []);
+
 
   const CELL_SIZE = 4;
   const COLS = 854;
@@ -88,7 +78,7 @@ function CanvasPage() {
 
     // draw colored grid cells per status
     data.cells.forEach(cell => {
-      const color = STATUS_COLORS[cell.status] || STATUS_COLORS.GRAY;
+      const color = STATUS_COLORS[cell.status] || STATUS_COLORS.undefined;
       ctx.fillStyle = color + "99";
       ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     });
