@@ -1,9 +1,10 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 require('dotenv').config()
+const { neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
+neonConfig.webSocketConstructor = ws;
 
 const express = require('express')
 const cors = require('cors')
-const pool = require('./config/pool')
 const sql = require('./config/pool');
 
 
