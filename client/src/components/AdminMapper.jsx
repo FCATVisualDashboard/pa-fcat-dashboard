@@ -8,6 +8,8 @@ export default function AdminMapper() {
   const imageRef = useRef(null);
   const lastDrawRef = useRef(null);
 
+  const [overlayScale, setOverlayScale] = useState(1);
+
   const [actionView, setActionView] = useState("add");
   const [editingPmId, setEditingPmId] = useState(null);
 
@@ -124,6 +126,7 @@ export default function AdminMapper() {
     overlayRotation,
     overlayOffsetX,
     overlayOffsetY,
+    overlayScale,
   ]);
 
   // Keyboard shortcuts
@@ -177,12 +180,14 @@ export default function AdminMapper() {
       const centerY = offsetY + imgHeight / 2 + overlayOffsetY;
       ctx.translate(centerX, centerY);
       ctx.rotate((overlayRotation * Math.PI) / 180);
+      const scaledWidth = imgWidth * overlayScale;
+      const scaledHeight = imgHeight * overlayScale;
       ctx.drawImage(
         overlayRef.current,
-        -imgWidth / 2,
-        -imgHeight / 2,
-        imgWidth,
-        imgHeight,
+        -scaledWidth / 2,
+        -scaledHeight / 2,
+        scaledWidth,
+        scaledHeight,
       );
       ctx.restore();
     }
@@ -1031,6 +1036,51 @@ export default function AdminMapper() {
                 onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
                 style={{ width: "150px" }}
               />
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "5px" }}
+            >
+              <label style={{ fontSize: "12px" }}>
+                Size: {Math.round(overlayScale * 100)}%
+              </label>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="range"
+                  min="50"
+                  max="200"
+                  step="1"
+                  value={Math.round(overlayScale * 100)}
+                  onChange={(e) =>
+                    setOverlayScale(parseFloat(e.target.value) / 100)
+                  }
+                  style={{ width: "110px" }}
+                />
+                <input
+                  type="number"
+                  min="50"
+                  max="200"
+                  step="1"
+                  value={Math.round(overlayScale * 100)}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val >= 50 && val <= 200) {
+                      setOverlayScale(val / 100);
+                    }
+                  }}
+                  style={{
+                    width: "55px",
+                    padding: "3px 6px",
+                    backgroundColor: "#222",
+                    color: "white",
+                    border: "1px solid #555",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                  }}
+                />
+                <span style={{ fontSize: "12px", color: "#aaa" }}>%</span>
+              </div>
             </div>
 
             <div style={{ display: "flex", gap: "5px", marginTop: "5px" }}>
