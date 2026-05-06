@@ -21,9 +21,6 @@ app.use(express.json())
 const gridRoutes = require('./routes/gridRoutes');
 app.use('/api/grid', gridRoutes);
 
-const seedRoutes = require('./routes/seedRoutes');
-app.use('/api/seed', seedRoutes);
-
 // Test DB connection
 sql`SELECT NOW()`
   .then(res => console.log("Database connected:", res[0]))
