@@ -21,6 +21,9 @@ app.use(express.json())
 const gridRoutes = require('./routes/gridRoutes');
 app.use('/api/grid', gridRoutes);
 
+const workOrderRoutes = require('./routes/workOrderRoutes');
+app.use('/api/workorders', workOrderRoutes);
+
 // Test DB connection
 sql`SELECT NOW()`
   .then(res => console.log("Database connected:", res[0]))
@@ -77,7 +80,7 @@ app.get('/api/dashboard', async (req, res) => {
           pm_id,
           CASE
             WHEN BOOL_OR(status <> 'CONCL' AND target_start_date < NOW()) THEN 'OVERDUE'
-            WHEN BOOL_OR(status = 'WASSGN') THEN 'WASSGN'
+            WHEN BOOL_OR(status IN ('WASSGN', 'WASSGND')) THEN 'WASSGN'
             WHEN BOOL_OR(status = 'APPR')   THEN 'APPR'
             WHEN BOOL_AND(status = 'CONCL') THEN 'CONCL'
             ELSE 'INACTIVE'

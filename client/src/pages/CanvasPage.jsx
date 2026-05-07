@@ -17,6 +17,7 @@ function CanvasPage() {
   // state for slide-out sidebar
   const [selectedZone, setSelectedZone] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [workOrderMap, setWorkOrderMap] = useState(new Map()); // pm_id -> work order details
 
   // update clock every second
   useEffect(() => {
@@ -47,6 +48,23 @@ function CanvasPage() {
           });
         }
         setCellMap(map);
+
+        // Build pm_id -> work order map (pick the most relevant: overdue > active > latest)
+        const woMap = new Map();
+        if (data.work_orders) {
+          data.work_orders.forEach(wo => {
+            if (!woMap.has(wo.pm_id)) {
+              woMap.set(wo.pm_id, wo);
+            } else {
+              const existing = woMap.get(wo.pm_id);
+              // Prefer overdue, then non-concluded, then most recent
+              const existingScore = existing.is_overdue ? 2 : existing.status !== 'CONCL' ? 1 : 0;
+              const newScore = wo.is_overdue ? 2 : wo.status !== 'CONCL' ? 1 : 0;
+              if (newScore > existingScore) woMap.set(wo.pm_id, wo);
+            }
+          });
+        }
+        setWorkOrderMap(woMap);
       })
 
       .catch(err => console.error("Failed to fetch dashboard data:", err))
@@ -172,11 +190,11 @@ function CanvasPage() {
     const cellData = cellMap.get(`${gridX},${gridY}`);
 
     if (cellData) {
-      // offset the tooltip slightly so it doesn't get covered by the cursor
+      const woDetails = workOrderMap.get(cellData.pm_id) || {};
       setHoverInfo({
         x: e.clientX + 15,
         y: e.clientY + 15,
-        data: cellData
+        data: { ...woDetails, ...cellData } // cellData.status (computed) wins
       });
     } else {
       // clear the tooltip if hovering over an empty part of the map
@@ -202,8 +220,9 @@ function CanvasPage() {
     const cellData = cellMap.get(`${gridX},${gridY}`);
 
     if (cellData) {
-      // if clicked a zone, open the sidebar and clear the hover tooltip
-      setSelectedZone(cellData);
+      // if clicked a zone, merge cell data with work order details
+      const woDetails = workOrderMap.get(cellData.pm_id) || {};
+      setSelectedZone({ ...woDetails, ...cellData }); // cellData.status (computed) wins over raw wo status
       setIsSidebarOpen(true);
       setHoverInfo(null); 
     } else {
