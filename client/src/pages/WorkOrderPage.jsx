@@ -168,7 +168,7 @@ export default function WorkOrderPage() {
     <div style={page}>
       {/* Navbar */}
       <div style={{ backgroundColor: "#1a1a1a", borderBottom: "2px solid #eeff00", height: 50, display: "flex", alignItems: "center", padding: "0 24px", gap: 24 }}>
-        <a href="/" style={{ color: "#fff", textDecoration: "none", fontWeight: "bold", fontSize: 16 }}>JFK FCAT PM Dashboard</a>
+        <a href="/" style={{ color: "#fff", textDecoration: "none", fontWeight: "bold", fontSize: 16 }}>Maximo FCAT PM Dashboard</a>
         <a href="/canvas" style={{ color: "#aaa", textDecoration: "none", fontSize: 14 }}>Map View</a>
         <a href="/admin" style={{ color: "#aaa", textDecoration: "none", fontSize: 14 }}>Admin Mapper</a>
         <span style={{ color: "#eeff00", fontSize: 14, fontWeight: "bold" }}>Work Orders</span>
