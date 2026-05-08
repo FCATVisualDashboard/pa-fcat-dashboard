@@ -1,0 +1,3375 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+client/.gitignore
+client/eslint.config.js
+client/index.html
+client/package.json
+client/public/favicon.svg
+client/public/icons.svg
+client/README.md
+client/src/App.css
+client/src/App.jsx
+client/src/assets/aerial.jpg
+client/src/assets/Airfield_PM_Areas.png
+client/src/assets/jfk.png
+client/src/colorMap.js
+client/src/components/AdminMapper.jsx
+client/src/config.js
+client/src/index.css
+client/src/main.jsx
+client/src/navbar.css
+client/src/pages/CanvasPage.jsx
+client/src/pages/WorkOrderPage.jsx
+client/vercel.json
+client/vite.config.js
+package.json
+README.md
+server/config/pool.js
+server/controllers/gridControllers.js
+server/controllers/workOrderController.js
+server/database/db.sql
+server/index.js
+server/package.json
+server/routes/gridRoutes.js
+server/routes/workOrderRoutes.js
+server/tests/grid.test.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+node_modules/
+.env
+.DS_Store
+</file>
+
+<file path="client/.gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+</file>
+
+<file path="client/eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+</file>
+
+<file path="client/index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>client</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="client/package.json">
+{
+  "name": "client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "vite": "^8.0.0"
+  }
+}
+</file>
+
+<file path="client/public/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="46" fill="none" viewBox="0 0 48 46"><path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" style="fill:#863bff;fill:color(display-p3 .5252 .23 1);fill-opacity:1"/><mask id="a" width="48" height="46" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M25.842 44.938c-.664.844-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.183c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.498 0-3.579-1.842-3.579H1.133c-.92 0-1.456-1.04-.92-1.787L9.91.473c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.578 1.842 3.578h11.377c.943 0 1.473 1.088.89 1.832L25.843 44.94z" style="fill:#000;fill-opacity:1"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#ede6ff" rx="5.508" ry="14.704" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -4.47 31.516)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#ede6ff" rx="10.399" ry="29.851" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -39.328 7.883)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#7e14ff" rx="5.508" ry="30.487" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -25.913 -14.639)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -32.644 -3.334)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -34.34 30.47)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#ede6ff" rx="14.072" ry="22.078" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="rotate(93.35 24.506 48.493)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx=".387" cy="8.972" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(39.51 .387 8.972)"/></g><g filter="url(#k)"><ellipse cx="47.523" cy="-6.092" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 47.523 -6.092)"/></g><g filter="url(#l)"><ellipse cx="41.412" cy="6.333" fill="#47bfff" rx="5.971" ry="9.665" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 41.412 6.333)"/></g><g filter="url(#m)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#n)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#o)"><ellipse cx="35.651" cy="29.907" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 35.651 29.907)"/></g><g filter="url(#p)"><ellipse cx="38.418" cy="32.4" fill="#47bfff" rx="5.971" ry="15.297" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 38.418 32.4)"/></g></g><defs><filter id="b" width="60.045" height="41.654" x="-19.77" y="16.149" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-54.613" y="-7.533" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-49.64" y="2.03" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-45.045" y="20.029" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-43.513" y="21.178" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="15.756" y="-17.901" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-27.636" y="-22.853" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="20.116" y="-38.415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="24.641" y="-11.323" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="8.244" y="-2.416" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="18.713" y="10.588" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter></defs></svg>
+</file>
+
+<file path="client/public/icons.svg">
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="bluesky-icon" viewBox="0 0 16 17">
+    <g clip-path="url(#bluesky-clip)"><path fill="#08060d" d="M7.75 7.735c-.693-1.348-2.58-3.86-4.334-5.097-1.68-1.187-2.32-.981-2.74-.79C.188 2.065.1 2.812.1 3.251s.241 3.602.398 4.13c.52 1.744 2.367 2.333 4.07 2.145-2.495.37-4.71 1.278-1.805 4.512 3.196 3.309 4.38-.71 4.987-2.746.608 2.036 1.307 5.91 4.93 2.746 2.72-2.746.747-4.143-1.747-4.512 1.702.189 3.55-.4 4.07-2.145.156-.528.397-3.691.397-4.13s-.088-1.186-.575-1.406c-.42-.19-1.06-.395-2.741.79-1.755 1.24-3.64 3.752-4.334 5.099"/></g>
+    <defs><clipPath id="bluesky-clip"><path fill="#fff" d="M.1.85h15.3v15.3H.1z"/></clipPath></defs>
+  </symbol>
+  <symbol id="discord-icon" viewBox="0 0 20 19">
+    <path fill="#08060d" d="M16.224 3.768a14.5 14.5 0 0 0-3.67-1.153c-.158.286-.343.67-.47.976a13.5 13.5 0 0 0-4.067 0c-.128-.306-.317-.69-.476-.976A14.4 14.4 0 0 0 3.868 3.77C1.546 7.28.916 10.703 1.231 14.077a14.7 14.7 0 0 0 4.5 2.306q.545-.748.965-1.587a9.5 9.5 0 0 1-1.518-.74q.191-.14.372-.293c2.927 1.369 6.107 1.369 8.999 0q.183.152.372.294-.723.437-1.52.74.418.838.963 1.588a14.6 14.6 0 0 0 4.504-2.308c.37-3.911-.63-7.302-2.644-10.309m-9.13 8.234c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.894 0 1.614.82 1.599 1.82.001 1-.705 1.82-1.6 1.82m5.91 0c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.893 0 1.614.82 1.599 1.82 0 1-.706 1.82-1.6 1.82"/>
+  </symbol>
+  <symbol id="documentation-icon" viewBox="0 0 21 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="m15.5 13.333 1.533 1.322c.645.555.967.833.967 1.178s-.322.623-.967 1.179L15.5 18.333m-3.333-5-1.534 1.322c-.644.555-.966.833-.966 1.178s.322.623.966 1.179l1.534 1.321"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M17.167 10.836v-4.32c0-1.41 0-2.117-.224-2.68-.359-.906-1.118-1.621-2.08-1.96-.599-.21-1.349-.21-2.848-.21-2.623 0-3.935 0-4.983.369-1.684.591-3.013 1.842-3.641 3.428C3 6.449 3 7.684 3 10.154v2.122c0 2.558 0 3.838.706 4.726q.306.383.713.671c.76.536 1.79.64 3.581.66"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M3 10a2.78 2.78 0 0 1 2.778-2.778c.555 0 1.209.097 1.748-.047.48-.129.854-.503.982-.982.145-.54.048-1.194.048-1.749a2.78 2.78 0 0 1 2.777-2.777"/>
+  </symbol>
+  <symbol id="github-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M9.356 1.85C5.05 1.85 1.57 5.356 1.57 9.694a7.84 7.84 0 0 0 5.324 7.44c.387.079.528-.168.528-.376 0-.182-.013-.805-.013-1.454-2.165.467-2.616-.935-2.616-.935-.349-.91-.864-1.143-.864-1.143-.71-.48.051-.48.051-.48.787.051 1.2.805 1.2.805.695 1.194 1.817.857 2.268.649.064-.507.27-.857.49-1.052-1.728-.182-3.545-.857-3.545-3.87 0-.857.31-1.558.8-2.104-.078-.195-.349-1 .077-2.078 0 0 .657-.208 2.14.805a7.5 7.5 0 0 1 1.946-.26c.657 0 1.328.092 1.946.26 1.483-1.013 2.14-.805 2.14-.805.426 1.078.155 1.883.078 2.078.502.546.799 1.247.799 2.104 0 3.013-1.818 3.675-3.558 3.87.284.247.528.714.528 1.454 0 1.052-.012 1.896-.012 2.156 0 .208.142.455.528.377a7.84 7.84 0 0 0 5.324-7.441c.013-4.338-3.48-7.844-7.773-7.844" clip-rule="evenodd"/>
+  </symbol>
+  <symbol id="social-icon" viewBox="0 0 20 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M12.5 6.667a4.167 4.167 0 1 0-8.334 0 4.167 4.167 0 0 0 8.334 0"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M2.5 16.667a5.833 5.833 0 0 1 8.75-5.053m3.837.474.513 1.035c.07.144.257.282.414.309l.93.155c.596.1.736.536.307.965l-.723.73a.64.64 0 0 0-.152.531l.207.903c.164.715-.213.991-.84.618l-.872-.52a.63.63 0 0 0-.577 0l-.872.52c-.624.373-1.003.094-.84-.618l.207-.903a.64.64 0 0 0-.152-.532l-.723-.729c-.426-.43-.289-.864.306-.964l.93-.156a.64.64 0 0 0 .412-.31l.513-1.034c.28-.562.735-.562 1.012 0"/>
+  </symbol>
+  <symbol id="x-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M1.893 1.98c.052.072 1.245 1.769 2.653 3.77l2.892 4.114c.183.261.333.48.333.486s-.068.089-.152.183l-.522.593-.765.867-3.597 4.087c-.375.426-.734.834-.798.905a1 1 0 0 0-.118.148c0 .01.236.017.664.017h.663l.729-.83c.4-.457.796-.906.879-.999a692 692 0 0 0 1.794-2.038c.034-.037.301-.34.594-.675l.551-.624.345-.392a7 7 0 0 1 .34-.374c.006 0 .93 1.306 2.052 2.903l2.084 2.965.045.063h2.275c1.87 0 2.273-.003 2.266-.021-.008-.02-1.098-1.572-3.894-5.547-2.013-2.862-2.28-3.246-2.273-3.266.008-.019.282-.332 2.085-2.38l2-2.274 1.567-1.782c.022-.028-.016-.03-.65-.03h-.674l-.3.342a871 871 0 0 1-1.782 2.025c-.067.075-.405.458-.75.852a100 100 0 0 1-.803.91c-.148.172-.299.344-.99 1.127-.304.343-.32.358-.345.327-.015-.019-.904-1.282-1.976-2.808L6.365 1.85H1.8zm1.782.91 8.078 11.294c.772 1.08 1.413 1.973 1.425 1.984.016.017.241.02 1.05.017l1.03-.004-2.694-3.766L7.796 5.75 5.722 2.852l-1.039-.004-1.039-.004z" clip-rule="evenodd"/>
+  </symbol>
+</svg>
+</file>
+
+<file path="client/README.md">
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+</file>
+
+<file path="client/src/App.css">
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+</file>
+
+<file path="client/src/App.jsx">
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import CanvasPage from "./pages/CanvasPage";
+import AdminMapper from "./components/AdminMapper";
+import WorkOrderPage from "./pages/WorkOrderPage";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<h1>Home</h1>} />
+        <Route path="/canvas" element={<CanvasPage />} />
+        <Route path="/admin" element={<AdminMapper />} />
+        <Route path="/workorders" element={<WorkOrderPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+</file>
+
+<file path="client/src/index.css">
+html, body {
+  margin: 0;
+  padding: 0;
+}
+</file>
+
+<file path="client/src/main.jsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+</file>
+
+<file path="client/src/pages/WorkOrderPage.jsx">
+import { useState, useRef, useCallback, useEffect } from "react";
+import API_BASE_URL from "../config";
+import { STATUS_COLORS } from "../colorMap";
+
+const STATUS_LABELS = {
+  OVERDUE: "Overdue",
+  WASSGN:  "Unapproved",
+  APPR:    "Approved",
+  CONCL:   "Completed",
+  INACTIVE:"Inactive",
+};
+
+function Badge({ status }) {
+  const color = STATUS_COLORS[status] || "#888";
+  return (
+    <span style={{
+      display: "inline-block",
+      padding: "2px 10px",
+      borderRadius: 12,
+      fontSize: 12,
+      fontWeight: "bold",
+      backgroundColor: color + "22",
+      color,
+      border: `1px solid ${color}`,
+    }}>
+      {STATUS_LABELS[status] || status || "—"}
+    </span>
+  );
+}
+
+export default function WorkOrderPage() {
+  const fileInputRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const [stage, setStage] = useState("idle"); // idle | previewing | uploading | done | error
+  const [preview, setPreview] = useState(null);   // { count, records }
+  const [result, setResult] = useState(null);     // upload result
+  const [errorMsg, setErrorMsg] = useState("");
+  const [pendingFile, setPendingFile] = useState(null);
+  const [workOrders, setWorkOrders] = useState([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // ── Fetch existing work orders ──────────────────────────────────────────────
+  const fetchWorkOrders = useCallback(() => {
+    setLoadingList(true);
+    fetch(`${API_BASE_URL}/api/workorders`)
+      .then(r => r.json())
+      .then(data => { setWorkOrders(Array.isArray(data) ? data : []); setLoadingList(false); })
+      .catch(() => setLoadingList(false));
+  }, []);
+
+  useEffect(() => { fetchWorkOrders(); }, [fetchWorkOrders]);
+
+  // ── Drag & drop ─────────────────────────────────────────────────────────────
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }, []);
+
+  const handleFile = async (file) => {
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+      setErrorMsg("Only .xlsx or .xls files are accepted.");
+      setStage("error");
+      return;
+    }
+    setPendingFile(file);
+    setStage("previewing");
+    setErrorMsg("");
+
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/workorders/upload?preview=true`, {
+        method: "POST",
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error((data.detail ? data.error + " — " + data.detail : data.error) || "Preview failed");
+      setPreview(data);
+    } catch (err) {
+      setErrorMsg(err.message);
+      setStage("error");
+    }
+  };
+
+  // ── Confirm upload ───────────────────────────────────────────────────────────
+  const handleConfirm = async () => {
+    if (!pendingFile) return;
+    setStage("uploading");
+    const fd = new FormData();
+    fd.append("file", pendingFile);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/workorders/upload`, {
+        method: "POST",
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error((data.detail ? data.error + " — " + data.detail : data.error) || "Upload failed");
+      setResult(data);
+      setStage("done");
+      fetchWorkOrders();
+    } catch (err) {
+      setErrorMsg(err.message);
+      setStage("error");
+    }
+  };
+
+  const handleReset = () => {
+    setStage("idle");
+    setPreview(null);
+    setResult(null);
+    setPendingFile(null);
+    setErrorMsg("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // ── Delete single ────────────────────────────────────────────────────────────
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/workorders/${encodeURIComponent(id)}`, { method: "DELETE" });
+      fetchWorkOrders();
+    } catch {}
+    setDeleteTarget(null);
+  };
+
+  // ── Filtered list ────────────────────────────────────────────────────────────
+  const filtered = filterStatus === "ALL"
+    ? workOrders
+    : workOrders.filter(wo => {
+        if (filterStatus === "OVERDUE") return wo.is_overdue;
+        return wo.status === filterStatus;
+      });
+
+  // ── Styles ────────────────────────────────────────────────────────────────────
+  const page = {
+    background: "linear-gradient(to top, #0b0b0b, #1a1a1a)",
+    minHeight: "100vh",
+    color: "#fff",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+  };
+  const card = {
+    background: "#1a1a1a",
+    border: "1px solid #333",
+    borderRadius: 10,
+    padding: "24px",
+    marginBottom: 24,
+  };
+  const th = {
+    textAlign: "left",
+    padding: "10px 14px",
+    fontSize: 12,
+    color: "#888",
+    textTransform: "uppercase",
+    letterSpacing: "0.8px",
+    borderBottom: "1px solid #333",
+  };
+  const td = {
+    padding: "10px 14px",
+    fontSize: 14,
+    borderBottom: "1px solid #222",
+    verticalAlign: "middle",
+  };
+
+  return (
+    <div style={page}>
+      {/* Navbar */}
+      <div style={{ backgroundColor: "#1a1a1a", borderBottom: "2px solid #eeff00", height: 50, display: "flex", alignItems: "center", padding: "0 24px", gap: 24 }}>
+        <a href="/" style={{ color: "#fff", textDecoration: "none", fontWeight: "bold", fontSize: 16 }}>JFK FCAT PM Dashboard</a>
+        <a href="/canvas" style={{ color: "#aaa", textDecoration: "none", fontSize: 14 }}>Map View</a>
+        <a href="/admin" style={{ color: "#aaa", textDecoration: "none", fontSize: 14 }}>Admin Mapper</a>
+        <span style={{ color: "#eeff00", fontSize: 14, fontWeight: "bold" }}>Work Orders</span>
+      </div>
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 20px" }}>
+        <h1 style={{ fontSize: 24, fontWeight: "bold", marginBottom: 8 }}>Work Order Management</h1>
+        <p style={{ color: "#888", marginTop: 0, marginBottom: 28 }}>
+          Upload a daily Excel export to sync work orders with the map. Existing records are updated in-place; new ones are inserted.
+        </p>
+
+        {/* ── Upload Card ────────────────────────────────────────────────────── */}
+        <div style={card}>
+          <h2 style={{ fontSize: 16, margin: "0 0 16px 0" }}>📤 Import from Excel</h2>
+
+          {stage === "idle" && (
+            <>
+              <div
+                onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: `2px dashed ${dragging ? "#007AFF" : "#444"}`,
+                  borderRadius: 8,
+                  padding: "48px 20px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  backgroundColor: dragging ? "#007AFF11" : "#111",
+                  transition: "0.2s",
+                }}
+              >
+                <div style={{ fontSize: 40, marginBottom: 12 }}>📊</div>
+                <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 6 }}>
+                  Drag & drop your Excel file here
+                </div>
+                <div style={{ color: "#666", fontSize: 13 }}>
+                  or click to browse — .xlsx and .xls supported
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                style={{ display: "none" }}
+                onChange={e => e.target.files[0] && handleFile(e.target.files[0])}
+              />
+              <div style={{ marginTop: 16, padding: "12px 16px", backgroundColor: "#111", borderRadius: 6, fontSize: 13, color: "#666", lineHeight: 1.6 }}>
+                <strong style={{ color: "#aaa" }}>Expected columns</strong> (names are matched flexibly):{" "}
+                <code style={{ color: "#eeff00" }}>Work Order ID</code>,{" "}
+                <code style={{ color: "#eeff00" }}>PM ID</code>,{" "}
+                <code style={{ color: "#eeff00" }}>Status</code>,{" "}
+                <code style={{ color: "#eeff00" }}>Target Start Date</code>,{" "}
+                <code style={{ color: "#eeff00" }}>Frequency</code>,{" "}
+                <code style={{ color: "#eeff00" }}>Description</code>
+              </div>
+            </>
+          )}
+
+          {stage === "previewing" && preview && (
+            <>
+              <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ padding: "6px 14px", backgroundColor: "#007AFF22", border: "1px solid #007AFF", borderRadius: 20, fontSize: 13, color: "#007AFF" }}>
+                  {preview.count} rows detected in <strong>{pendingFile?.name}</strong>
+                </div>
+                {preview.unlinked > 0 && (
+                  <div style={{ padding: "6px 14px", backgroundColor: "#FF9F0A22", border: "1px solid #FF9F0A", borderRadius: 20, fontSize: 13, color: "#FF9F0A" }}>
+                    ⚠ {preview.unlinked} rows have no matching area (will import as unlinked)
+                  </div>
+                )}
+                <span style={{ color: "#666", fontSize: 13 }}>
+                  {preview.count > 50 ? `Showing first 50 rows below.` : ""}
+                </span>
+              </div>
+
+              <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #333", marginBottom: 20 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "#111" }}>
+                      {["Work Order ID", "PM ID", "Status", "Target Start Date", "Frequency", "Description"].map(h => (
+                        <th key={h} style={th}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.records.map((r, i) => (
+                      <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#161616" : "#111" }}>
+                        <td style={td}><code style={{ color: "#eeff00" }}>{r.work_order_id}</code></td>
+                        <td style={td}>{r.pm_id || <span style={{ color: "#555" }}>—</span>}</td>
+                        <td style={td}>{r.status ? <Badge status={r.status} /> : <span style={{ color: "#555" }}>—</span>}</td>
+                        <td style={td}>{r.target_start_date ? new Date(r.target_start_date).toLocaleDateString() : <span style={{ color: "#555" }}>—</span>}</td>
+                        <td style={td}>{r.frequency || <span style={{ color: "#555" }}>—</span>}</td>
+                        <td style={td} style={{ ...td, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description || <span style={{ color: "#555" }}>—</span>}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ display: "flex", gap: 12 }}>
+                <button onClick={handleConfirm} style={{ padding: "10px 24px", backgroundColor: "#34C759", color: "#fff", border: "none", borderRadius: 6, fontWeight: "bold", cursor: "pointer", fontSize: 14 }}>
+                  ✓ Confirm Import ({preview.count} rows)
+                </button>
+                <button onClick={handleReset} style={{ padding: "10px 18px", backgroundColor: "transparent", color: "#aaa", border: "1px solid #444", borderRadius: 6, cursor: "pointer", fontSize: 14 }}>
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
+
+          {stage === "uploading" && (
+            <div style={{ textAlign: "center", padding: "40px 0", color: "#888" }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+              <div>Importing work orders…</div>
+            </div>
+          )}
+
+          {stage === "done" && result && (
+            <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 40 }}>✅</div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 4 }}>Import complete</div>
+                <div style={{ color: "#888", fontSize: 14 }}>
+                  <span style={{ color: "#34C759" }}>{result.inserted} inserted</span>
+                  {" · "}
+                  <span style={{ color: "#007AFF" }}>{result.updated} updated</span>
+                  {" · "}
+                  {result.total} total rows processed
+                </div>
+              </div>
+              <button onClick={handleReset} style={{ marginLeft: "auto", padding: "8px 20px", backgroundColor: "#222", color: "#aaa", border: "1px solid #444", borderRadius: 6, cursor: "pointer" }}>
+                Upload another file
+              </button>
+            </div>
+          )}
+
+          {stage === "error" && (
+            <div style={{ padding: 16, backgroundColor: "#FF3B3022", border: "1px solid #FF3B30", borderRadius: 6 }}>
+              <div style={{ color: "#FF3B30", fontWeight: "bold", marginBottom: 6 }}>Upload failed</div>
+              <div style={{ color: "#ddd", fontSize: 14 }}>{errorMsg}</div>
+              <button onClick={handleReset} style={{ marginTop: 12, padding: "6px 16px", backgroundColor: "transparent", color: "#aaa", border: "1px solid #444", borderRadius: 6, cursor: "pointer" }}>
+                Try again
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Work Orders Table ───────────────────────────────────────────────── */}
+        <div style={card}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+            <h2 style={{ fontSize: 16, margin: 0 }}>📋 Current Work Orders ({workOrders.length})</h2>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {["ALL", "OVERDUE", "WASSGN", "APPR", "CONCL", "INACTIVE"].map(s => (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatus(s)}
+                  style={{
+                    padding: "4px 12px",
+                    borderRadius: 12,
+                    border: `1px solid ${filterStatus === s ? (STATUS_COLORS[s] || "#007AFF") : "#444"}`,
+                    backgroundColor: filterStatus === s ? (STATUS_COLORS[s] || "#007AFF") + "22" : "transparent",
+                    color: filterStatus === s ? (STATUS_COLORS[s] || "#007AFF") : "#888",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loadingList ? (
+            <div style={{ color: "#555", textAlign: "center", padding: 40 }}>Loading…</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ color: "#555", textAlign: "center", padding: 40 }}>
+              {workOrders.length === 0
+                ? "No work orders yet. Upload an Excel file above to get started."
+                : "No work orders match this filter."}
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #333" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#111" }}>
+                    {["Work Order ID", "PM ID", "Status", "Due Date", "Frequency", "Description", ""].map(h => (
+                      <th key={h} style={th}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((wo, i) => (
+                    <tr key={wo.work_order_id} style={{ backgroundColor: i % 2 === 0 ? "#161616" : "#111" }}>
+                      <td style={td}><code style={{ color: "#eeff00" }}>{wo.work_order_id}</code></td>
+                      <td style={td}>{wo.pm_id || <span style={{ color: "#555" }}>—</span>}</td>
+                      <td style={td}>
+                        <Badge status={wo.is_overdue ? "OVERDUE" : wo.status} />
+                      </td>
+                      <td style={{ ...td, color: wo.is_overdue ? "#FF3B30" : "#fff" }}>
+                        {wo.target_start_date
+                          ? new Date(wo.target_start_date).toLocaleDateString()
+                          : <span style={{ color: "#555" }}>Unscheduled</span>}
+                      </td>
+                      <td style={td}>{wo.frequency || <span style={{ color: "#555" }}>—</span>}</td>
+                      <td style={{ ...td, maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {wo.description || <span style={{ color: "#555" }}>—</span>}
+                      </td>
+                      <td style={td}>
+                        {deleteTarget === wo.work_order_id ? (
+                          <span style={{ display: "flex", gap: 6 }}>
+                            <button onClick={() => handleDelete(wo.work_order_id)} style={{ padding: "3px 10px", backgroundColor: "#FF3B30", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Confirm</button>
+                            <button onClick={() => setDeleteTarget(null)} style={{ padding: "3px 8px", backgroundColor: "transparent", color: "#aaa", border: "1px solid #444", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Cancel</button>
+                          </span>
+                        ) : (
+                          <button onClick={() => setDeleteTarget(wo.work_order_id)} style={{ padding: "3px 10px", backgroundColor: "transparent", color: "#FF3B30", border: "1px solid #FF3B30", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Delete</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="client/vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+</file>
+
+<file path="server/controllers/workOrderController.js">
+const sql = require('../config/pool');
+const XLSX = require('xlsx');
+
+// ================= COLUMN MAPPING =================
+const COLUMN_ALIASES = {
+  work_order_id:    ['workorder', 'workorderid', 'woid', 'orderid'],
+  pm_id:            ['pmid', 'pm'],
+  status:           ['status'],
+  target_start_date:['targetstart', 'targetstartdate', 'startdate', 'duedate', 'scheduleddate', 'scheduledstart'],
+  frequency:        ['frequency', 'freq', 'recurrence', 'worktype'],
+  description:      ['description', 'desc', 'notes', 'workdescription'],
+};
+
+function strip(str) {
+  return String(str ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function resolveHeaders(rawHeaders) {
+  const mapping = {};
+  rawHeaders.forEach((raw, idx) => {
+    const key = strip(raw);
+    if (!key) return;
+    for (const [field, aliases] of Object.entries(COLUMN_ALIASES)) {
+      if (mapping[field] != null) continue;
+      if (aliases.some(alias => key === alias || key.startsWith(alias) || alias.startsWith(key))) {
+        mapping[field] = idx;
+        break;
+      }
+    }
+  });
+  return mapping;
+}
+
+function extractPmIdFromDescription(description) {
+  if (!description) return null;
+  const bracketMatch = String(description).match(/\[([^\]]+)\]/);
+  if (!bracketMatch) return null;
+  const inner = bracketMatch[1].trim(); // e.g. "TW-22", "TW-66A", "13R-6"
+  // Extract just the part after the last dash — "TW-22" -> "22", "TW-66A" -> "66A"
+  const parts = inner.split('-');
+  return parts[parts.length - 1] || inner;
+}
+
+// Excel stores dates as serial numbers (days since 1900-01-01, with a known
+// off-by-one leap year bug). This converts without relying on XLSX.SSF.
+function excelSerialToISO(serial) {
+  // 25569 = days between 1900-01-01 and 1970-01-01 (accounting for the Excel leap year bug)
+  const ms = (serial - 25569) * 86400 * 1000;
+  const d = new Date(ms);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function parseDate(value) {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value === 'number') return excelSerialToISO(value);
+  // Already a JS Date (happens when cellDates:true is used)
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value.toISOString();
+  // String date
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+// ================= UPLOAD =================
+exports.uploadWorkOrders = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: false });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+
+    if (rows.length < 2) {
+      return res.status(400).json({ error: 'Excel file appears to be empty or has no data rows.' });
+    }
+
+    // Scan first 5 rows to find the header row
+    let headerRowIdx = 0;
+    let colMap = {};
+    for (let i = 0; i < Math.min(5, rows.length); i++) {
+      const candidate = resolveHeaders(rows[i]);
+      if (candidate.work_order_id != null) {
+        headerRowIdx = i;
+        colMap = candidate;
+        break;
+      }
+    }
+
+    if (colMap.work_order_id == null) {
+      return res.status(400).json({
+        error: 'Could not find a "Work Order" column in the first 5 rows.',
+        scanned_rows: rows.slice(0, 5).map(r =>
+          r.map(cell => (cell === null ? '(empty)' : String(cell)))
+        ),
+      });
+    }
+
+    // Pre-load areas so we can match by EITHER pm_id OR description (e.g. "TW-79")
+    const areaRows = await sql`SELECT pm_id, description FROM areas`;
+    const validPmIds = new Set(areaRows.map(r => r.pm_id));
+    // description -> pm_id lookup (case-insensitive, trimmed)
+    const descToPmId = new Map(
+      areaRows
+        .filter(r => r.description)
+        .map(r => [r.description.trim().toLowerCase(), r.pm_id])
+    );
+
+    const dataRows = rows.slice(headerRowIdx + 1).filter(row =>
+      row.some(cell => cell !== null && cell !== '')
+    );
+
+    const records = dataRows.map(row => {
+      const rawDescription = colMap.description != null
+        ? String(row[colMap.description] ?? '').trim()
+        : null;
+
+      // Always prefer bracket extraction from description (e.g. "[TW-22]" -> "22")
+      // The explicit PM column contains work order system numbers (e.g. 6675772) which are not area IDs
+      const rawPmId = extractPmIdFromDescription(rawDescription) || null;
+
+      // Match strategy (in order):
+      // 1. rawPmId is already a valid pm_id
+      // 2. rawPmId matches an area's description (e.g. "TW-79" -> pm_id)
+      // 3. No match -> use rawPmId as-is and auto-create the area during upsert
+      let pm_id = null;
+      let needsAreaCreate = false;
+      if (rawPmId) {
+        if (validPmIds.has(rawPmId)) {
+          pm_id = rawPmId;
+        } else {
+          const byDesc = descToPmId.get(rawPmId.toLowerCase());
+          if (byDesc) {
+            pm_id = byDesc;
+          } else {
+            // Area doesn't exist yet — use the extracted value as the pm_id
+            // and flag it for auto-creation
+            pm_id = rawPmId;
+            needsAreaCreate = true;
+          }
+        }
+      }
+
+      return {
+        work_order_id:     String(row[colMap.work_order_id] ?? '').trim(),
+        pm_id,
+        needsAreaCreate,
+        status:            colMap.status            != null ? String(row[colMap.status]            ?? '').trim().toUpperCase() : null,
+        target_start_date: colMap.target_start_date != null ? parseDate(row[colMap.target_start_date]) : null,
+        frequency:         colMap.frequency         != null ? String(row[colMap.frequency]         ?? '').trim() : null,
+        description:       rawDescription?.slice(0, 255) ?? null,
+      };
+    }).filter(r => r.work_order_id);
+
+    if (records.length === 0) {
+      return res.status(400).json({ error: 'No valid rows found after parsing.' });
+    }
+
+    // Debug log so the mismatch is visible in the server terminal
+    console.log('[WO Upload] Area descriptions in DB (first 10):', [...descToPmId.keys()].slice(0, 10));
+    const sampleExtracted = dataRows.slice(0, 5).map(row => {
+      const desc = colMap.description != null ? String(row[colMap.description] ?? '') : '(no desc col)';
+      return { raw_description: desc.slice(0, 80), extracted: extractPmIdFromDescription(desc) };
+    });
+    console.log('[WO Upload] Sample extracted values:', JSON.stringify(sampleExtracted, null, 2));
+
+    // Preview mode — return parsed data without touching the DB
+    if (req.query.preview === 'true') {
+      const unlinked = records.filter(r => !r.pm_id).length;
+
+      // Diagnostic: show what was extracted vs what areas exist, to surface mismatches
+      const extractedSample = [...new Set(
+        dataRows.slice(0, 20).map(row => {
+          const desc = colMap.description != null ? String(row[colMap.description] ?? '') : '';
+          const explicit = colMap.pm_id != null ? String(row[colMap.pm_id] ?? '').trim() : '';
+          const fromBrackets = extractPmIdFromDescription(desc);
+          return { explicit: explicit || null, from_brackets: fromBrackets, description_sample: desc.slice(0, 60) };
+        })
+      )];
+
+      return res.json({
+        preview: true,
+        count: records.length,
+        unlinked,
+        records: records.slice(0, 50),
+        column_mapping: Object.fromEntries(
+          Object.entries(colMap).map(([field, idx]) => [field, rows[headerRowIdx][idx]])
+        ),
+        debug: {
+          valid_area_ids: [...validPmIds].slice(0, 20),
+          extracted_sample: extractedSample,
+        },
+      });
+    }
+
+    // Auto-create any areas that don't exist yet (no grid cells, just the areas row)
+    const toCreate = [...new Map(
+      records
+        .filter(r => r.needsAreaCreate && r.pm_id)
+        .map(r => [r.pm_id, r])
+    ).values()];
+
+    for (const r of toCreate) {
+      await sql`
+        INSERT INTO areas (pm_id, description)
+        VALUES (${r.pm_id}, ${r.pm_id})
+        ON CONFLICT (pm_id) DO NOTHING
+      `;
+    }
+
+    // Upsert work orders
+    let inserted = 0;
+    let updated  = 0;
+
+    for (const r of records) {
+      const result = await sql`
+        INSERT INTO work_order (work_order_id, pm_id, status, target_start_date, frequency, description)
+        VALUES (
+          ${r.work_order_id},
+          ${r.pm_id             || null},
+          ${r.status            || null},
+          ${r.target_start_date || null},
+          ${r.frequency         || null},
+          ${r.description       || null}
+        )
+        ON CONFLICT (work_order_id)
+        DO UPDATE SET
+          pm_id             = EXCLUDED.pm_id,
+          status            = EXCLUDED.status,
+          target_start_date = EXCLUDED.target_start_date,
+          frequency         = EXCLUDED.frequency,
+          description       = EXCLUDED.description
+        RETURNING (xmax = 0) AS is_insert
+      `;
+      if (result[0]?.is_insert) inserted++;
+      else updated++;
+    }
+
+    res.json({
+      message: `Import complete. ${inserted} inserted, ${updated} updated. ${toCreate.length} new areas auto-created (unmapped).`,
+      inserted,
+      updated,
+      areas_created: toCreate.length,
+      total: records.length,
+    });
+
+  } catch (err) {
+    console.error('Work order upload error:', err);
+    // Return the full error message to the client so it's visible in the UI
+    res.status(500).json({
+      error: 'Failed to parse or save work orders.',
+      detail: err.message,
+      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+    });
+  }
+};
+
+// ================= GET ALL =================
+exports.getAllWorkOrders = async (req, res) => {
+  try {
+    const result = await sql`
+      SELECT work_order_id, pm_id, status, target_start_date, frequency, description,
+             CASE WHEN status <> 'CONCL' AND target_start_date < NOW() THEN true ELSE false END AS is_overdue
+      FROM work_order
+      ORDER BY target_start_date DESC NULLS LAST
+    `;
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ================= DELETE ONE =================
+exports.deleteWorkOrder = async (req, res) => {
+  const { work_order_id } = req.params;
+  try {
+    await sql`DELETE FROM work_order WHERE work_order_id = ${work_order_id}`;
+    res.json({ message: `Deleted work order ${work_order_id}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ================= CLEAR ALL =================
+exports.clearAllWorkOrders = async (req, res) => {
+  try {
+    await sql`DELETE FROM work_order`;
+    res.json({ message: 'All work orders cleared.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+</file>
+
+<file path="server/routes/workOrderRoutes.js">
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const workOrderController = require('../controllers/workOrderController');
+
+// Store file in memory (buffer) — no disk writes needed
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB cap
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel',                                           // .xls
+      'application/octet-stream',                                           // fallback
+    ];
+    if (allowed.includes(file.mimetype) || file.originalname.match(/\.(xlsx|xls)$/i)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only Excel files (.xlsx, .xls) are accepted.'));
+    }
+  },
+});
+
+// POST /api/workorders/upload?preview=true   — parse & preview without saving
+// POST /api/workorders/upload                — parse & upsert into DB
+router.post('/upload', upload.single('file'), workOrderController.uploadWorkOrders);
+
+// GET  /api/workorders                       — fetch all work orders
+router.get('/', workOrderController.getAllWorkOrders);
+
+// DELETE /api/workorders/:work_order_id      — remove a single work order
+router.delete('/:work_order_id', workOrderController.deleteWorkOrder);
+
+// DELETE /api/workorders                     — wipe all (dev/reset use)
+router.delete('/', workOrderController.clearAllWorkOrders);
+
+module.exports = router;
+</file>
+
+<file path="client/src/config.js">
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
+export default API_BASE_URL;
+</file>
+
+<file path="client/vercel.json">
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+</file>
+
+<file path="client/src/navbar.css">
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  width: 100%;
+  height: 50px;
+  box-sizing: border-box;
+}
+
+.navbar-center ul {
+  display: flex;
+  list-style: none;
+  gap: 2.5rem;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: white;
+  font-size: 15px;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.navbar a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #eeff00;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.navbar a:hover {
+  color: #eeff00;
+}
+
+.navbar a:hover::after {
+  transform: scaleX(0.7);
+}
+
+.navbar-left a {
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.navbar-stat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-stat-label {
+  font-size: 11px;
+  color: #aaaaaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.navbar-stat-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+</file>
+
+<file path="package.json">
+{
+  "dependencies": {
+    "cors": "^2.8.6",
+    "multer": "^2.1.1",
+    "pg": "^8.20.0",
+    "xlsx": "^0.18.5"
+  }
+}
+</file>
+
+<file path="server/database/db.sql">
+CREATE TABLE areas (
+    pm_id VARCHAR(50) PRIMARY KEY,
+    description VARCHAR(255)
+);
+
+CREATE TABLE grid (
+    id SERIAL PRIMARY KEY,
+    x_pos INTEGER,
+    y_pos INTEGER,
+    pm_id VARCHAR(50) REFERENCES areas(pm_id),
+    UNIQUE (pm_id, x_pos, y_pos)
+);
+
+CREATE TABLE work_order (
+    work_order_id VARCHAR(50) PRIMARY KEY,
+    pm_id VARCHAR(50) REFERENCES areas(pm_id),
+    status VARCHAR(50),
+    target_start_date TIMESTAMP,
+    frequency VARCHAR(50),
+    description VARCHAR(255)
+);
+</file>
+
+<file path="server/tests/grid.test.js">
+const request = require('supertest');
+const express = require('express');
+const gridRoutes = require('../routes/gridRoutes');
+
+// MOCK THE SQL DRIVER: replace neon sql tag with a jest function
+jest.mock('../config/pool', () => {
+  const mockSql = jest.fn();
+  mockSql.mockResolvedValue([]);
+  return mockSql;
+});
+
+const sql = require('../config/pool');
+
+const app = express();
+app.use(express.json());
+app.use('/api/grid', gridRoutes);
+
+describe('Grid API Routes', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sql.mockResolvedValue([]); // default: return empty array
+  });
+
+  // --- TEST 1: GET ROUTE ---
+  it('GET /api/grid/all - should successfully fetch coordinates', async () => {
+    const fakeRows = [
+      { pm_id: "TEST-01", x_pos: 10, y_pos: 15 },
+      { pm_id: "TEST-01", x_pos: 11, y_pos: 15 }
+    ];
+    sql.mockResolvedValueOnce(fakeRows);
+
+    const response = await request(app).get('/api/grid/all');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveLength(2);
+    expect(response.body[0].pm_id).toBe("TEST-01");
+  });
+
+  // --- TEST 2: POST ROUTE ---
+  it('POST /api/grid/save - should successfully save an area', async () => {
+    sql.mockResolvedValue([]); // all queries succeed
+
+    const payload = {
+      pm_id: "HVAC-123",
+      description: "Main Vent",
+      coordinates: ["10,10", "10,11"]
+    };
+
+    const response = await request(app)
+      .post('/api/grid/save')
+      .send(payload);
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("Area successfully mapped and saved.");
+    expect(sql).toHaveBeenCalled();
+  });
+
+  // --- TEST 3: DELETE ROUTE ---
+  it('DELETE /api/grid/delete/:pm_id - should delete an area', async () => {
+    sql.mockResolvedValue([]);
+
+    const response = await request(app).delete('/api/grid/delete/HVAC-123');
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("Successfully deleted area HVAC-123");
+    expect(sql).toHaveBeenCalledTimes(2); // DELETE grid + DELETE areas
+  });
+
+  // --- TEST 4: ERROR HANDLING ---
+  it('POST /api/grid/save - should reject invalid payloads with a 400 error', async () => {
+    const badPayload = { pm_id: "HVAC-123" };
+
+    const response = await request(app)
+      .post('/api/grid/save')
+      .send(badPayload);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("Missing or invalid PM ID and coordinates.");
+    expect(sql).not.toHaveBeenCalled(); // DB shouldn't be touched
+  });
+
+});
+</file>
+
+<file path="client/src/colorMap.js">
+export const STATUS_COLORS = {
+    OVERDUE:    '#FF3B30',  // overdue
+    WASSGN: '#FFD60A',  // unapproved (WASSGN)
+    APPR: '#FF9F0A',  // approved (APPR)
+    CONCL:  '#34C759',  // completed (CONCL)
+    INACTIVE:   '#c1c1c1',  // inactive
+    null:       '#c1c1c1',  // no work order assigned
+    undefined:  '#c1c1c1',  // fallback
+}
+</file>
+
+<file path="server/package.json">
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mssql": "^12.2.0",
+    "pg": "^8.20.0",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
+  }
+}
+</file>
+
+<file path="server/routes/gridRoutes.js">
+const express = require('express');
+const router = express.Router();
+const gridController = require('../controllers/gridControllers');
+
+// POST request to save data
+router.post('/save', gridController.saveGridArea);
+
+// GET request to fetch data
+router.get('/all', gridController.getAllGrids);
+
+// DELETE request to remove data for a specific PM ID
+router.delete('/delete/:pm_id', gridController.deleteGridArea);
+
+// PATCH request to edit data for a specific PM ID
+router.put('/edit/:pm_id', gridController.updateGridArea);
+
+module.exports = router;
+</file>
+
+<file path="server/config/pool.js">
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+const { neon, neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
+neonConfig.webSocketConstructor = ws;
+
+require('dotenv').config();
+
+const sql = neon(process.env.DATABASE_URL);
+
+module.exports = sql;
+</file>
+
+<file path="server/controllers/gridControllers.js">
+const sql = require('../config/pool');
+
+// ================= SAVE AREA =================
+exports.saveGridArea = async (req, res) => {
+    const { pm_id, description, coordinates } = req.body;
+
+    console.log("Coords length:", coordinates?.length);
+
+    if (!pm_id || !coordinates || !Array.isArray(coordinates)) {
+        return res.status(400).json({ error: "Missing or invalid PM ID and coordinates." });
+    }
+
+    try {
+        // ensure area exists
+        await sql`
+            INSERT INTO areas (pm_id, description)
+            VALUES (${pm_id}, ${description || `Mapped area for ${pm_id}`})
+            ON CONFLICT (pm_id)
+            DO UPDATE SET description = EXCLUDED.description
+        `;
+
+        // clear old grid
+        await sql`DELETE FROM grid WHERE pm_id = ${pm_id}`;
+
+        // 🔥 safe per-row insert
+        for (let coord of coordinates) {
+            const [x, y] = coord.split(',').map(Number);
+            if (isNaN(x) || isNaN(y)) continue;
+
+            await sql`
+                INSERT INTO grid (pm_id, x_pos, y_pos)
+                VALUES (${pm_id}, ${x}, ${y})
+                ON CONFLICT (pm_id, x_pos, y_pos) DO NOTHING
+            `;
+        }
+
+        console.log("Saved coordinates:", coordinates.length, "rows for PM:", pm_id);
+        res.status(200).json({ message: "Area successfully mapped and saved." });
+
+    } catch (error) {
+        console.error("Database error saving grid:", error);
+        res.status(500).json({ error: "Internal server error while saving map." });
+    }
+};
+
+
+// ================= GET ALL =================
+exports.getAllGrids = async (req, res) => {
+    try {
+        const result = await sql`SELECT pm_id, x_pos, y_pos FROM grid`;
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Database error fetching grids:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+
+
+// ================= DELETE =================
+exports.deleteGridArea = async (req, res) => {
+    const { pm_id } = req.params;
+
+    try {
+        await sql`DELETE FROM grid WHERE pm_id = ${pm_id}`;
+        await sql`DELETE FROM areas WHERE pm_id = ${pm_id}`;
+
+        res.status(200).json({ message: `Successfully deleted area ${pm_id}` });
+
+    } catch (error) {
+        console.error("Database error deleting area:", error);
+        res.status(500).json({ error: "Internal server error while deleting map area." });
+    }
+};
+
+
+// ================= UPDATE =================
+exports.updateGridArea = async (req, res) => {
+    const targetPmId = req.params.pm_id;
+    const { pm_id, description, coordinates } = req.body;
+
+    try {
+        await sql`DELETE FROM grid WHERE pm_id = ${targetPmId}`;
+
+        for (let coord of coordinates) {
+            const [x, y] = coord.split(',').map(Number);
+            if (isNaN(x) || isNaN(y)) continue;
+
+            await sql`
+                INSERT INTO grid (pm_id, x_pos, y_pos)
+                VALUES (${pm_id}, ${x}, ${y})
+            `;
+        }
+
+        res.status(200).json({ message: "Area successfully updated!" });
+
+    } catch (error) {
+        console.error("Error updating area:", error);
+        res.status(500).json({ error: "Failed to update area" });
+    }
+};
+</file>
+
+<file path="client/src/pages/CanvasPage.jsx">
+import { useEffect, useRef, useState } from "react";
+import jfkImg from "../assets/aerial.jpg";
+import '../navbar.css'
+import API_BASE_URL from "../config";
+import { STATUS_COLORS } from "../colorMap";
+
+function CanvasPage() {
+  const canvasRef = useRef(null);
+  const imgRef = useRef(null);
+  const [dashboardData, setDashboardData] = useState({ cells: [], centers: [] });
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // state for tooltip hover info
+  const [cellMap, setCellMap] = useState(new Map());
+  const [hoverInfo, setHoverInfo] = useState(null);
+
+  // state for slide-out sidebar
+  const [selectedZone, setSelectedZone] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const lastRefreshed = "Today at 6:00 AM";
+  const complianceData = {
+    total: 24,
+    completed: 18,
+    approved: 3,
+    unapproved: 2,
+    overdue: 1,
+  };
+  const compliancePct = Math.round((complianceData.completed / complianceData.total) * 100);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/dashboard`)
+      .then(res => res.json())
+      .then(data => {
+        setDashboardData(data);
+
+        const map = new Map();
+        if (data.cells) {
+          data.cells.forEach(cell => {
+            map.set(`${cell.x_pos},${cell.y_pos}`, cell);
+          });
+        }
+        setCellMap(map);
+      })
+
+      .catch(err => console.error("Failed to fetch dashboard data:", err))
+  }, []);
+
+
+  const CELL_SIZE = 4;
+  const COLS = 854;
+  const ROWS = 480;
+
+  const draw = (canvas, ctx, img, data) => {
+    if (!data || !data.cells || !data.centers){
+      return;
+    }
+
+    canvas.width = COLS * CELL_SIZE;
+    canvas.height = ROWS * CELL_SIZE;
+
+    ctx.fillStyle = "#1e1e1e";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+    const imgWidth = img.width * scale;
+    const imgHeight = img.height * scale;
+    const offsetX = (canvas.width - imgWidth) / 2;
+    const offsetY = (canvas.height - imgHeight) / 2;
+
+    ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+
+    // draw colored grid cells per status
+    data.cells.forEach(cell => {
+      const color = STATUS_COLORS[cell.status] || STATUS_COLORS.undefined;
+      ctx.fillStyle = color + "99";
+      ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    });
+
+    // highlight the actively selected zone in white if the sidebar is open
+    if (isSidebarOpen && selectedZone) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)"; // White highlight
+      data.cells.forEach(cell => {
+        if (cell.pm_id === selectedZone.pm_id) {
+          ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+      });
+    }
+
+    // draw grid lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // draw labels over each zone center
+    ctx.font = "bold 22px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    data.centers.forEach(zone => {
+      const x = zone.center_x * CELL_SIZE;
+      const y = zone.center_y * CELL_SIZE;
+      const color = STATUS_COLORS[zone.status] || STATUS_COLORS.GRAY;
+
+      const textWidth = ctx.measureText(zone.description).width;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+      ctx.beginPath();
+      ctx.roundRect(x - textWidth / 2 - 8, y - 14, textWidth + 16, 28, 6);
+      ctx.fill();
+
+      ctx.fillStyle = color;
+      ctx.fillText(zone.description, x, y);
+    });
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const img = imgRef.current;
+    if (!canvas || !img) return;
+    const ctx = canvas.getContext("2d");
+    draw(canvas, ctx, img, dashboardData);
+  }, [dashboardData]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.src = jfkImg;
+
+    img.onload = () => {
+      imgRef.current = img;
+      draw(canvas, ctx, img, dashboardData);
+    };
+
+    const handleResize = () => {
+      if (imgRef.current) draw(canvas, ctx, imgRef.current, dashboardData);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleMouseMove = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    // convert mouse position to internal 4K canvas coordinates
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    // snap to the nearest grid cell
+    const gridX = Math.floor(x / CELL_SIZE);
+    const gridY = Math.floor(y / CELL_SIZE);
+    
+    // check if we have data for this specific grid coordinate
+    const cellData = cellMap.get(`${gridX},${gridY}`);
+
+    if (cellData) {
+      // offset the tooltip slightly so it doesn't get covered by the cursor
+      setHoverInfo({
+        x: e.clientX + 15,
+        y: e.clientY + 15,
+        data: cellData
+      });
+    } else {
+      // clear the tooltip if hovering over an empty part of the map
+      setHoverInfo(null);
+    }
+  };
+
+  // click handler to open/close sidebar
+  const handleCanvasClick = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    const gridX = Math.floor(x / CELL_SIZE);
+    const gridY = Math.floor(y / CELL_SIZE);
+    
+    const cellData = cellMap.get(`${gridX},${gridY}`);
+
+    if (cellData) {
+      // if clicked a zone, open the sidebar and clear the hover tooltip
+      setSelectedZone(cellData);
+      setIsSidebarOpen(true);
+      setHoverInfo(null); 
+    } else {
+      // if clicked empty space, close the sidebar
+      setIsSidebarOpen(false);
+      setSelectedZone(null);
+    }
+  };
+
+  return (
+    <div style={{
+  background: 'linear-gradient(to top, #0b0b0b, #333232)',
+  width: '100vw',
+  minHeight: '100vh',    
+  margin: 0,
+  padding: 0,
+  display: 'flex',         
+  flexDirection: 'column', 
+  boxSizing: 'border-box',  
+  overflow: 'auto'          
+}}>
+
+      <div style={{
+  backgroundColor: "#1a1a1a",
+  borderBottom: "2px solid #eeff00",
+  flexShrink: 0,
+  height: "50px",
+}}>
+  <nav className="navbar" role="navigation">
+    <div className="navbar-left">
+      <a href="/">JFK FCAT PM Dashboard</a>
+    </div>
+    <div className="navbar-center">
+      <ul>
+        <li>
+          <span className="navbar-stat">
+            <span className="navbar-stat-label">Last Refreshed:</span>
+            <span className="navbar-stat-value">{lastRefreshed}</span>
+          </span>
+        </li>
+        <li>
+          <span className="navbar-stat">
+            <span className="navbar-stat-label">Compliance:</span>
+            <span className="navbar-stat-value" style={{ color: compliancePct >= 80 ? '#34C759' : compliancePct >= 50 ? '#FF9F0A' : '#FF3B30' }}>
+              {compliancePct}%
+            </span>
+          </span>
+        </li>
+        {/* <li>
+          <span className="navbar-stat">
+            <span className="navbar-stat-label">Overdue:</span>
+            <span className="navbar-stat-value" style={{ color: complianceData.overdue > 0 ? '#FF3B30' : '#34C759' }}>
+              {complianceData.overdue}
+            </span>
+          </span>
+        </li> */}
+      </ul>
+    </div>
+    <div className="navbar-right">
+      <span className="navbar-stat">
+        <span className="navbar-stat-label">
+          {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        </span>
+        <span className="navbar-stat-value">
+          {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
+      </span>
+    </div>
+  </nav>
+</div>
+      {/* Main Content Area (Canvas + Sidebar) */}
+      <div style={{ flex: 1, position: "relative", display: "flex" }}>
+        
+        {/* Canvas Container */}
+        <div style={{ flex: 1, padding: "20px", transition: "padding-right 0.3s ease" }}>
+          <canvas
+            ref={canvasRef}
+            style={{
+              display: "block",
+              width: "100%",
+              aspectRatio: "16 / 9",
+              border: "2px solid #ff453a",
+              cursor: hoverInfo ? "pointer" : "crosshair"
+            }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoverInfo(null)}
+            onClick={handleCanvasClick} 
+          />
+        </div>
+
+        {/* Slide-Out Sidebar */}
+        <div style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "400px",
+          backgroundColor: "rgba(20, 20, 20, 0.98)",
+          borderLeft: "1px solid #333",
+          boxShadow: "-5px 0 25px rgba(0,0,0,0.7)", 
+          transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)", 
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)", 
+          zIndex: 100,
+          display: "flex",
+          flexDirection: "column",
+          color: "white"
+        }}>
+          
+          {selectedZone && (
+            <>
+              {/* Sidebar Header */}
+              <div style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center", 
+                padding: "20px", 
+                borderBottom: "1px solid #333",
+                backgroundColor: "#1a1a1a"
+              }}>
+                <h2 style={{ margin: 0, fontSize: "20px" }}>{selectedZone.pm_id}</h2>
+                <button 
+                  onClick={() => setIsSidebarOpen(false)}
+                  style={{ 
+                    background: "none", border: "none", color: "#888", fontSize: "28px", 
+                    cursor: "pointer", padding: "0 5px", lineHeight: "1" 
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+
+              {/* Sidebar Scrollable Body */}
+              <div style={{ padding: "25px 20px", flex: 1, overflowY: "auto" }}>
+                
+                {/* Status Badge */}
+                <div style={{ marginBottom: "30px" }}>
+                  <span style={{ 
+                    display: "inline-block",
+                    padding: "6px 12px", 
+                    borderRadius: "20px", 
+                    backgroundColor: (STATUS_COLORS[selectedZone.status] || '#555') + "33", 
+                    color: STATUS_COLORS[selectedZone.status] || '#fff',
+                    border: `1px solid ${STATUS_COLORS[selectedZone.status] || '#555'}`,
+                    fontWeight: "bold",
+                    fontSize: "14px"
+                  }}>
+                    {selectedZone.status || 'STATUS UNKNOWN'}
+                  </span>
+                </div>
+
+                {/* Detailed Data Rows */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <div>
+                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Description</label>
+                    <div style={{ fontSize: "16px", marginTop: "4px" }}>{selectedZone.description || 'No description provided.'}</div>
+                  </div>
+
+                  <div>
+                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Target Start Date</label>
+                    <div style={{ fontSize: "16px", marginTop: "4px" }}>
+                      {selectedZone.target_start_date ? new Date(selectedZone.target_start_date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Unscheduled'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Maintenance Frequency</label>
+                    <div style={{ fontSize: "16px", marginTop: "4px" }}>{selectedZone.frequency || 'N/A'}</div>
+                  </div>
+
+                  {/* Placeholder for future expansion (e.g. Notes, Action Buttons) */}
+                  <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #333" }}>
+                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Actions</label>
+                    <button style={{ 
+                      width: "100%", marginTop: "10px", padding: "10px", 
+                      backgroundColor: "#007AFF", color: "white", border: "none", 
+                      borderRadius: "6px", cursor: "pointer", fontWeight: "bold" 
+                    }}>
+                      Update Work Order
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Floating Tooltip (Only renders if sidebar is closed) */}
+      {!isSidebarOpen && hoverInfo && hoverInfo.data && (
+        <div style={{
+          position: "fixed",
+          left: hoverInfo.x,
+          top: hoverInfo.y,
+          backgroundColor: "rgba(20, 20, 20, 0.75)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+          border: `1px solid ${STATUS_COLORS[hoverInfo.data.status] || '#555'}`,
+          borderRadius: "8px",
+          padding: "12px 16px",
+          color: "#fff",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          pointerEvents: "none",
+          zIndex: 1000,
+          minWidth: "200px"
+        }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: "16px", borderBottom: "1px solid #444", paddingBottom: "6px" }}>
+            {hoverInfo.data.pm_id}
+          </h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#aaa" }}>Status:</span>
+              <span style={{ fontWeight: "bold", color: STATUS_COLORS[hoverInfo.data.status] || '#fff' }}>
+                {hoverInfo.data.status || 'N/A'}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#aaa" }}>Due Date:</span>
+              <span>
+                {hoverInfo.data.target_start_date ? new Date(hoverInfo.data.target_start_date).toLocaleDateString() : 'Unscheduled'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default CanvasPage;
+</file>
+
+<file path="server/index.js">
+require('dotenv').config()
+const { neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
+neonConfig.webSocketConstructor = ws;
+
+const express = require('express')
+const cors = require('cors')
+const sql = require('./config/pool')
+
+const app = express()
+const PORT = process.env.PORT || 5001;
+
+app.use(cors({
+  origin: [
+    'https://pa-fcat-dashboard.vercel.app',
+    'http://localhost:5173'
+  ]
+}));
+app.use(express.json())
+
+const gridRoutes = require('./routes/gridRoutes');
+app.use('/api/grid', gridRoutes);
+
+const workOrderRoutes = require('./routes/workOrderRoutes');
+app.use('/api/workorders', workOrderRoutes);
+
+// Test DB connection
+sql`SELECT NOW()`
+  .then(res => console.log("Database connected:", res[0]))
+  .catch(err => console.error("Database connection failed:", err));
+
+app.get('/api/status', (req, res) => {
+  res.json({ status: 'ok' })
+})
+
+app.get('/api/areas', async (req, res) => {
+  try {
+    const result = await sql`SELECT * FROM areas`
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/workorders', async (req, res) => {
+  try {
+    const result = await sql`SELECT * FROM work_order`
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/grid/centers', async (req, res) => {
+  try {
+    const result = await sql`
+      SELECT g.pm_id, a.description,
+        ROUND(AVG(g.x_pos)) AS center_x,
+        ROUND(AVG(g.y_pos)) AS center_y
+      FROM grid g
+      JOIN areas a ON g.pm_id = a.pm_id
+      GROUP BY g.pm_id, a.description
+    `
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/dashboard', async (req, res) => {
+  try {
+    // Resolve worst-case status per zone in SQL
+    const statusRows = await sql`
+      WITH overdue_wo AS (
+        SELECT pm_id FROM work_order
+        WHERE status <> 'CONCL' AND target_start_date < NOW()
+      ),
+      zone_status AS (
+        SELECT
+          pm_id,
+          CASE
+            WHEN BOOL_OR(status <> 'CONCL' AND target_start_date < NOW()) THEN 'OVERDUE'
+            WHEN BOOL_OR(status = 'WASSGN') THEN 'WASSGN'
+            WHEN BOOL_OR(status = 'APPR')   THEN 'APPR'
+            WHEN BOOL_AND(status = 'CONCL') THEN 'CONCL'
+            ELSE 'INACTIVE'
+          END AS status
+        FROM work_order
+        GROUP BY pm_id
+      )
+      SELECT pm_id, status FROM zone_status
+    `;
+
+    const statusMap = {};
+    statusRows.forEach(r => { statusMap[r.pm_id] = r.status; });
+
+    const gridRows = await sql`
+      SELECT g.x_pos, g.y_pos, g.pm_id, a.description
+      FROM grid g
+      JOIN areas a ON g.pm_id = a.pm_id
+    `;
+
+    const cells = gridRows.map(cell => ({
+      ...cell,
+      status: statusMap[cell.pm_id] || 'INACTIVE'
+    }));
+
+    const centerRows = await sql`
+      SELECT g.pm_id, a.description,
+        ROUND(AVG(g.x_pos)) AS center_x,
+        ROUND(AVG(g.y_pos)) AS center_y
+      FROM grid g
+      JOIN areas a ON g.pm_id = a.pm_id
+      GROUP BY g.pm_id, a.description
+    `;
+
+    const centers = centerRows.map(zone => ({
+      ...zone,
+      status: statusMap[zone.pm_id] || 'INACTIVE'
+    }));
+
+    const work_orders = await sql`
+      SELECT
+        work_order_id, pm_id, status, target_start_date, frequency, description,
+        CASE WHEN status <> 'CONCL' AND target_start_date < NOW()
+             THEN TRUE ELSE FALSE END AS is_overdue
+      FROM work_order
+      ORDER BY target_start_date DESC
+    `;
+
+    res.json({ cells, centers, work_orders })
+  } catch (err) {
+    console.error('Dashboard error:', err.message);
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+});
+
+module.exports = app;
+</file>
+
+<file path="client/src/components/AdminMapper.jsx">
+import { useRef, useEffect, useState } from "react";
+import aerialImg from "../assets/aerial.jpg";
+import API_BASE_URL from "../config";
+import pmOverlayImg from "../assets/Airfield_PM_Areas.png";
+
+export default function AdminMapper() {
+  const canvasRef = useRef(null);
+  const imageRef = useRef(null);
+  const lastDrawRef = useRef(null);
+
+  const [overlayScale, setOverlayScale] = useState(1);
+
+  const [actionView, setActionView] = useState("add");
+  const [editingPmId, setEditingPmId] = useState(null);
+
+  const [paintedCells, setPaintedCells] = useState(new Set());
+  const [isPainting, setIsPainting] = useState(false);
+  const [savedAreas, setSavedAreas] = useState([]);
+  const [description, setDescription] = useState("");
+  const [mode, setMode] = useState("paint");
+  const [pmId, setPmId] = useState("");
+
+  const [deleteInput, setDeleteInput] = useState("");
+  const [polygonPath, setPolygonPath] = useState([]);
+
+  // OVERLAY STATE
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [overlayOpacity, setOverlayOpacity] = useState(0.4);
+  const [overlayRotation, setOverlayRotation] = useState(0);
+  const [overlayOffsetX, setOverlayOffsetX] = useState(0);
+  const [overlayOffsetY, setOverlayOffsetY] = useState(0);
+
+  // OVERLAY INTERACTION TRACKING
+  const [overlayMode, setOverlayMode] = useState("locked");
+  const [isRotating, setIsRotating] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // REFS FOR SMOOTH MATH
+  const overlayRef = useRef(null);
+  const overlayStartAngleRef = useRef(0);
+  const overlayInitialRotRef = useRef(0);
+  const overlayStartDragXRef = useRef(0);
+  const overlayStartDragYRef = useRef(0);
+  const overlayInitialOffsetXRef = useRef(0);
+  const overlayInitialOffsetYRef = useRef(0);
+
+  // UNDO / REDO
+  const [undoCount, setUndoCount] = useState(0);
+  const [redoCount, setRedoCount] = useState(0);
+  const undoStackRef = useRef([]);
+  const redoStackRef = useRef([]);
+  const strokeStartRef = useRef(null);
+
+  const CELL_SIZE = 4;
+  const COLS = 854;
+  const ROWS = 480;
+  const CANVAS_WIDTH = CELL_SIZE * COLS;
+  const CANVAS_HEIGHT = CELL_SIZE * ROWS;
+
+  // ─── DATA FETCHING ───────────────────────────────────────────────────────────
+
+  const fetchSavedGrids = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/grid/all`);
+      if (response.ok) {
+        const data = await response.json();
+        setSavedAreas(data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved grids:", error);
+    }
+  };
+
+  // ─── LIFECYCLE ───────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    fetchSavedGrids();
+
+    const img = new Image();
+    img.src = aerialImg;
+    img.onload = () => {
+      imageRef.current = img;
+      draw();
+    };
+
+    const overlay = new Image();
+    overlay.src = pmOverlayImg;
+    overlay.onload = () => {
+      overlayRef.current = overlay;
+      draw();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paintedCells.size === 0 && mode === "erase") {
+      setMode("paint");
+    }
+  }, [paintedCells.size, mode]);
+
+  // Reset state when switching away from edit mode
+  useEffect(() => {
+    if (actionView !== "edit") {
+      setEditingPmId(null);
+      setPaintedCells(new Set());
+      setPmId("");
+      setDescription("");
+    }
+  }, [actionView]);
+
+  // Clear painted cells when entering delete mode
+  useEffect(() => {
+    if (actionView === "delete") {
+      setPaintedCells(new Set());
+      setMode("paint");
+    }
+  }, [actionView]);
+
+  // Re-draw canvas when relevant state changes
+  useEffect(() => {
+    draw();
+  }, [
+    paintedCells,
+    savedAreas,
+    showOverlay,
+    overlayOpacity,
+    overlayRotation,
+    overlayOffsetX,
+    overlayOffsetY,
+    overlayScale,
+  ]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === "z") {
+        e.preventDefault();
+        handleUndo();
+      }
+      if (e.ctrlKey && e.key === "y") {
+        e.preventDefault();
+        handleRedo();
+      }
+      if (!e.ctrlKey && (e.key === "p" || e.key === "P")) setMode("paint");
+      if (!e.ctrlKey && (e.key === "e" || e.key === "E")) setMode("erase");
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [paintedCells]);
+
+  // ─── DRAWING ─────────────────────────────────────────────────────────────────
+
+  const draw = () => {
+    const canvas = canvasRef.current;
+    const img = imageRef.current;
+    if (!canvas || !img) return;
+
+    const ctx = canvas.getContext("2d");
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+
+    ctx.fillStyle = "#1e1e1e";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const scale = Math.max(
+      canvas.width / img.width,
+      canvas.height / img.height,
+    );
+    const imgWidth = img.width * scale;
+    const imgHeight = img.height * scale;
+    const offsetX = (canvas.width - imgWidth) / 2;
+    const offsetY = (canvas.height - imgHeight) / 2;
+
+    ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+
+    // Draw overlay if enabled
+    if (showOverlay && overlayRef.current) {
+      ctx.save();
+      ctx.globalAlpha = overlayOpacity;
+      const centerX = offsetX + imgWidth / 2 + overlayOffsetX;
+      const centerY = offsetY + imgHeight / 2 + overlayOffsetY;
+      ctx.translate(centerX, centerY);
+      ctx.rotate((overlayRotation * Math.PI) / 180);
+      const scaledWidth = imgWidth * overlayScale;
+      const scaledHeight = imgHeight * overlayScale;
+      ctx.drawImage(
+        overlayRef.current,
+        -scaledWidth / 2,
+        -scaledHeight / 2,
+        scaledWidth,
+        scaledHeight,
+      );
+      ctx.restore();
+    }
+
+    // Draw saved database cells in blue
+    ctx.fillStyle = "rgba(10, 132, 255, 0.5)";
+    savedAreas.forEach((cell) => {
+      if (cell.pm_id === editingPmId) return;
+      ctx.fillRect(
+        cell.x_pos * CELL_SIZE,
+        cell.y_pos * CELL_SIZE,
+        CELL_SIZE,
+        CELL_SIZE,
+      );
+    });
+
+    // Draw active painted cells in red
+    ctx.fillStyle = "rgba(255, 69, 58, 0.7)";
+    paintedCells.forEach((cellKey) => {
+      const [gridX, gridY] = cellKey.split(",").map(Number);
+      ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    });
+
+    // Draw grid lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+  };
+
+  // ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+  const getGridCoordinates = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    return {
+      gridX: Math.floor(x / CELL_SIZE),
+      gridY: Math.floor(y / CELL_SIZE),
+    };
+  };
+
+  const getCellsOnLine = (x0, y0, x1, y1) => {
+    const cells = [];
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
+    let sx = x0 < x1 ? 1 : -1;
+    let sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+    while (true) {
+      cells.push(`${x0},${y0}`);
+      if (x0 === x1 && y0 === y1) break;
+      let e2 = 2 * err;
+      if (e2 > -dy) {
+        err -= dy;
+        x0 += sx;
+      }
+      if (e2 < dx) {
+        err += dx;
+        y0 += sy;
+      }
+    }
+    return cells;
+  };
+
+  // ─── PAINT ───────────────────────────────────────────────────────────────────
+
+  const applyPaint = (cellsArray) => {
+    setPaintedCells((prev) => {
+      redoStackRef.current = [];
+      setRedoCount(0);
+
+      const nextSet = new Set(prev);
+      cellsArray.forEach((cell) => {
+        if (mode === "paint") nextSet.add(cell);
+        else if (mode === "erase") nextSet.delete(cell);
+      });
+      return nextSet;
+    });
+  };
+
+  const handleClearAll = () => {
+    if (window.confirm("Are you sure you want to clear all painted cells?")) {
+      undoStackRef.current = [];
+      redoStackRef.current = [];
+      setUndoCount(0);
+      setRedoCount(0);
+      setPaintedCells(new Set());
+      setMode("paint");
+    }
+  };
+
+  // ─── UNDO / REDO ─────────────────────────────────────────────────────────────
+
+  const handleUndo = () => {
+    if (undoStackRef.current.length === 0) return;
+    const previous = undoStackRef.current.pop();
+    redoStackRef.current.push(new Set(paintedCells));
+    setUndoCount(undoStackRef.current.length);
+    setRedoCount(redoStackRef.current.length);
+    setPaintedCells(previous);
+  };
+
+  const handleRedo = () => {
+    if (redoStackRef.current.length === 0) return;
+    const next = redoStackRef.current.pop();
+    undoStackRef.current.push(new Set(paintedCells));
+    setUndoCount(undoStackRef.current.length);
+    setRedoCount(redoStackRef.current.length);
+    setPaintedCells(next);
+  };
+
+  // ─── SAVE / DELETE ───────────────────────────────────────────────────────────
+
+  const handleSave = async () => {
+    if (!pmId) {
+      alert("Please enter a PM ID before saving!");
+      return;
+    }
+    if (paintedCells.size === 0) {
+      alert("Please paint some cells on the map before saving!");
+      return;
+    }
+
+    const payload = {
+      pm_id: pmId,
+      description: description,
+      coordinates: Array.from(paintedCells),
+    };
+
+    try {
+      const endpoint = editingPmId
+        ? `${API_BASE_URL}/api/grid/edit/${editingPmId}`
+        : `${API_BASE_URL}/api/grid/save`;
+      const method = editingPmId ? "PUT" : "POST";
+
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 409) {
+        const data = await response.json();
+        alert(data.error);
+        return;
+      }
+      if (!response.ok) throw new Error("Failed to save to database");
+
+      const data = await response.json();
+      alert(`Success: ${data.message} (${paintedCells.size} cells)`);
+
+      fetchSavedGrids();
+      setPaintedCells(new Set());
+      setPmId("");
+      setDescription("");
+      setEditingPmId(null);
+      setMode("paint");
+      undoStackRef.current = [];
+      redoStackRef.current = [];
+      setUndoCount(0);
+      setRedoCount(0);
+    } catch (error) {
+      console.error("Error saving area:", error);
+      alert(
+        "There was an error saving the area. Check your terminal for backend errors.",
+      );
+    }
+  };
+
+  const executeDelete = async (targetPmId) => {
+    if (!targetPmId) return alert("Please provide a PM ID to delete.");
+
+    if (
+      window.confirm(
+        `Are you absolutely sure you want to permanently delete the area: ${targetPmId}?`,
+      )
+    ) {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/grid/delete/${targetPmId}`,
+          {
+            method: "DELETE",
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to delete from database");
+
+        alert(`Successfully deleted ${targetPmId}`);
+        fetchSavedGrids();
+        setDeleteInput("");
+      } catch (error) {
+        console.error("Error deleting area:", error);
+        alert("There was an error deleting the area.");
+      }
+    }
+  };
+
+  // ─── CANVAS EVENTS ───────────────────────────────────────────────────────────
+
+  const handleCanvasMouseDown = (e) => {
+    const { gridX, gridY } = getGridCoordinates(e);
+
+    // INTERCEPT: Overlay Movement (Dragging)
+    if (showOverlay && overlayMode === "move") {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      setIsDragging(true);
+      overlayStartDragXRef.current = (e.clientX - rect.left) * scaleX;
+      overlayStartDragYRef.current = (e.clientY - rect.top) * scaleY;
+      overlayInitialOffsetXRef.current = overlayOffsetX;
+      overlayInitialOffsetYRef.current = overlayOffsetY;
+      return;
+    }
+
+    // INTERCEPT: Overlay Rotation
+    if (showOverlay && overlayMode === "rotate") {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+      const centerX = canvas.width / 2 + overlayOffsetX;
+      const centerY = canvas.height / 2 + overlayOffsetY;
+      const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+      setIsRotating(true);
+      overlayStartAngleRef.current = angle;
+      overlayInitialRotRef.current = overlayRotation;
+      return;
+    }
+
+    // DELETE: click on or near a blue area to delete it
+    if (actionView === "delete") {
+      const TOLERANCE = 2;
+      const clickedCell = savedAreas.find(
+        (c) =>
+          Math.abs(c.x_pos - gridX) <= TOLERANCE &&
+          Math.abs(c.y_pos - gridY) <= TOLERANCE,
+      );
+      if (clickedCell) {
+        executeDelete(clickedCell.pm_id);
+      }
+      return; // never paint in delete mode
+    }
+
+    // EDIT: click to select an area first, then allow painting
+    if (actionView === "edit" && !editingPmId) {
+      const TOLERANCE = 2;
+      const clickedCell = savedAreas.find(
+        (c) =>
+          Math.abs(c.x_pos - gridX) <= TOLERANCE &&
+          Math.abs(c.y_pos - gridY) <= TOLERANCE,
+      );
+      if (clickedCell) {
+        const targetPmId = clickedCell.pm_id;
+        const cellsForPm = savedAreas.filter((c) => c.pm_id === targetPmId);
+        setPmId(targetPmId);
+        setDescription(cellsForPm[0]?.description || "");
+        setEditingPmId(targetPmId);
+        const newPainted = new Set();
+        cellsForPm.forEach((c) => newPainted.add(`${c.x_pos},${c.y_pos}`));
+        setPaintedCells(newPainted);
+        setMode("paint");
+      }
+      return; // don't start painting until area is selected
+    }
+
+    // ADD or EDIT with area already selected: snapshot then paint
+    strokeStartRef.current = new Set(paintedCells);
+    setIsPainting(true);
+    setPolygonPath([{ x: gridX, y: gridY }]);
+    applyPaint([`${gridX},${gridY}`]);
+  };
+
+  const handleCanvasMouseMove = (e) => {
+    // INTERCEPT: Overlay Dragging
+    if (isDragging) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+      const dx = mouseX - overlayStartDragXRef.current;
+      const dy = mouseY - overlayStartDragYRef.current;
+      setOverlayOffsetX(overlayInitialOffsetXRef.current + dx);
+      setOverlayOffsetY(overlayInitialOffsetYRef.current + dy);
+      return;
+    }
+
+    // INTERCEPT: Overlay Rotation
+    if (isRotating) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+      const centerX = canvas.width / 2 + overlayOffsetX;
+      const centerY = canvas.height / 2 + overlayOffsetY;
+      const currentAngle = Math.atan2(mouseY - centerY, mouseX - centerX);
+      const angleDiff = currentAngle - overlayStartAngleRef.current;
+      const angleDiffDegrees = angleDiff * (180 / Math.PI);
+      setOverlayRotation(overlayInitialRotRef.current + angleDiffDegrees);
+      return;
+    }
+
+    if (overlayMode !== "locked") return;
+    if (!isPainting || actionView === "delete") return;
+
+    const { gridX, gridY } = getGridCoordinates(e);
+    const lastPoint = polygonPath[polygonPath.length - 1];
+
+    if (lastPoint && (lastPoint.x !== gridX || lastPoint.y !== gridY)) {
+      setPolygonPath((prev) => [...prev, { x: gridX, y: gridY }]);
+      const cellsToUpdate = getCellsOnLine(
+        lastPoint.x,
+        lastPoint.y,
+        gridX,
+        gridY,
+      );
+      applyPaint(cellsToUpdate);
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    if (isRotating || isDragging) {
+      setIsRotating(false);
+      setIsDragging(false);
+      return;
+    }
+
+    if (overlayMode !== "locked") return;
+    if (!isPainting || actionView === "delete") return;
+
+    // Push the pre-stroke snapshot once the full stroke is complete
+    if (strokeStartRef.current !== null) {
+      undoStackRef.current.push(strokeStartRef.current);
+      strokeStartRef.current = null;
+      setUndoCount(undoStackRef.current.length);
+    }
+
+    setIsPainting(false);
+
+    // Auto-fill polygon if shape was drawn in paint mode
+    if (polygonPath.length > 2 && mode === "paint") {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      const path = new Path2D();
+      path.moveTo(polygonPath[0].x * CELL_SIZE, polygonPath[0].y * CELL_SIZE);
+      for (let i = 1; i < polygonPath.length; i++) {
+        path.lineTo(polygonPath[i].x * CELL_SIZE, polygonPath[i].y * CELL_SIZE);
+      }
+      path.closePath();
+
+      const minX = Math.min(...polygonPath.map((p) => p.x));
+      const maxX = Math.max(...polygonPath.map((p) => p.x));
+      const minY = Math.min(...polygonPath.map((p) => p.y));
+      const maxY = Math.max(...polygonPath.map((p) => p.y));
+
+      const filledCells = [];
+      for (let x = minX; x <= maxX; x++) {
+        for (let y = minY; y <= maxY; y++) {
+          const testX = x * CELL_SIZE + CELL_SIZE / 2;
+          const testY = y * CELL_SIZE + CELL_SIZE / 2;
+          if (ctx.isPointInPath(path, testX, testY)) {
+            filledCells.push(`${x},${y}`);
+          }
+        }
+      }
+      applyPaint(filledCells);
+    }
+
+    setPolygonPath([]);
+  };
+
+  // ─── RENDER ──────────────────────────────────────────────────────────────────
+
+  return (
+    <div
+      style={{
+        padding: "20px",
+        backgroundColor: "#121212",
+        color: "white",
+        minHeight: "100vh",
+      }}
+    >
+      {/* Toolbar */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "20px",
+          marginBottom: "15px",
+          backgroundColor: "#1a1a1a",
+          padding: "12px 20px",
+          borderRadius: "8px",
+          border: "1px solid #333",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+        }}
+      >
+        {/* Segmented Control */}
+        <div
+          style={{
+            display: "flex",
+            backgroundColor: "#000",
+            padding: "4px",
+            borderRadius: "6px",
+          }}
+        >
+          <button
+            onClick={() => setActionView("add")}
+            style={{
+              padding: "6px 16px",
+              backgroundColor: actionView === "add" ? "#333" : "transparent",
+              color: actionView === "add" ? "white" : "#888",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              transition: "0.2s",
+            }}
+          >
+            Add Area
+          </button>
+          <button
+            onClick={() => {
+              setActionView("edit");
+              setPaintedCells(new Set());
+            }}
+            style={{
+              padding: "6px 16px",
+              backgroundColor:
+                actionView === "edit" ? "#007AFF" : "transparent",
+              color: actionView === "edit" ? "white" : "#888",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              transition: "0.2s",
+            }}
+          >
+            Edit Area
+          </button>
+          <button
+            onClick={() => setActionView("delete")}
+            style={{
+              padding: "6px 16px",
+              backgroundColor:
+                actionView === "delete" ? "#ff453a" : "transparent",
+              color: actionView === "delete" ? "white" : "#888",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              transition: "0.2s",
+            }}
+          >
+            Delete Area
+          </button>
+        </div>
+
+        {/* Vertical Divider */}
+        <div
+          style={{ width: "1px", height: "30px", backgroundColor: "#444" }}
+        ></div>
+
+        {/* Contextual Controls */}
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            alignItems: "center",
+            gap: "15px",
+          }}
+        >
+          {actionView === "add" || actionView === "edit" ? (
+            <>
+              <input
+                type="text"
+                value={pmId}
+                onChange={(e) => setPmId(e.target.value)}
+                placeholder="PM ID (e.g. 6671234)"
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: "4px",
+                  border: "1px solid #555",
+                  backgroundColor: "#222",
+                  color: "white",
+                  width: "150px",
+                }}
+              />
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Location Name"
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: "4px",
+                  border: "1px solid #555",
+                  backgroundColor: "#222",
+                  color: "white",
+                  width: "200px",
+                }}
+              />
+
+              <div style={{ display: "flex", gap: "5px", marginLeft: "10px" }}>
+                <button
+                  onClick={() => setMode("paint")}
+                  style={{
+                    padding: "6px 15px",
+                    backgroundColor: mode === "paint" ? "#007AFF" : "#333",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Paint
+                </button>
+                {paintedCells.size > 0 && (
+                  <>
+                    <button
+                      onClick={() => setMode("erase")}
+                      style={{
+                        padding: "6px 15px",
+                        backgroundColor: mode === "erase" ? "#ff453a" : "#333",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Erase
+                    </button>
+                    <button
+                      onClick={handleClearAll}
+                      style={{
+                        padding: "6px 15px",
+                        backgroundColor: "transparent",
+                        color: "#ff9f0a",
+                        border: "1px solid #ff9f0a",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Clear All
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Undo / Redo */}
+              <div style={{ display: "flex", gap: "5px" }}>
+                <button
+                  onClick={handleUndo}
+                  disabled={undoCount === 0}
+                  title="Undo (Ctrl+Z)"
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#333",
+                    color: undoCount === 0 ? "#555" : "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: undoCount === 0 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  ↩ Undo {undoCount > 0 && `(${undoCount})`}
+                </button>
+                <button
+                  onClick={handleRedo}
+                  disabled={redoCount === 0}
+                  title="Redo (Ctrl+Y)"
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#333",
+                    color: redoCount === 0 ? "#555" : "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: redoCount === 0 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  ↪ Redo {redoCount > 0 && `(${redoCount})`}
+                </button>
+              </div>
+
+              {/* Shortcuts Tooltip */}
+              <div style={{ position: "relative" }}>
+                <button
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.nextSibling.style.display = "block")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.nextSibling.style.display = "none")
+                  }
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#222",
+                    color: "#aaa",
+                    border: "1px solid #444",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                  }}
+                >
+                  ⌨ Shortcuts
+                </button>
+                <div
+                  style={{
+                    display: "none",
+                    position: "absolute",
+                    top: "110%",
+                    left: 0,
+                    backgroundColor: "#1a1a1a",
+                    border: "1px solid #444",
+                    borderRadius: "6px",
+                    padding: "12px 16px",
+                    minWidth: "180px",
+                    zIndex: 100,
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+                    color: "white",
+                    fontSize: "13px",
+                    lineHeight: "2",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "6px",
+                      color: "#aaa",
+                    }}
+                  >
+                    Keyboard Shortcuts
+                  </div>
+                  <div>
+                    ↩{" "}
+                    <kbd
+                      style={{
+                        backgroundColor: "#333",
+                        padding: "2px 6px",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      Ctrl+Z
+                    </kbd>{" "}
+                    Undo
+                  </div>
+                  <div>
+                    ↪{" "}
+                    <kbd
+                      style={{
+                        backgroundColor: "#333",
+                        padding: "2px 6px",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      Ctrl+Y
+                    </kbd>{" "}
+                    Redo
+                  </div>
+                  <div>
+                    🖌{" "}
+                    <kbd
+                      style={{
+                        backgroundColor: "#333",
+                        padding: "2px 6px",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      P
+                    </kbd>{" "}
+                    Paint mode
+                  </div>
+                  <div>
+                    ⌫{" "}
+                    <kbd
+                      style={{
+                        backgroundColor: "#333",
+                        padding: "2px 6px",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      E
+                    </kbd>{" "}
+                    Erase mode
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSave}
+                style={{
+                  padding: "8px 20px",
+                  backgroundColor: "#34C759",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  marginLeft: "auto",
+                }}
+              >
+                Save Area
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Delete Controls */}
+              <span style={{ color: "#aaa", fontStyle: "italic" }}>
+                Click a blue area on the map to delete it, or:
+              </span>
+              <input
+                type="text"
+                value={deleteInput}
+                onChange={(e) => setDeleteInput(e.target.value)}
+                placeholder="Enter PM ID"
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: "4px",
+                  border: "1px solid #555",
+                  backgroundColor: "#222",
+                  color: "white",
+                  marginLeft: "auto",
+                }}
+              />
+              <button
+                onClick={() => executeDelete(deleteInput)}
+                style={{
+                  padding: "6px 15px",
+                  backgroundColor: "#ff453a",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                Delete
+              </button>
+            </>
+          )}
+
+          {/* Blueprint Mode Toggle */}
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                backgroundColor: showOverlay ? "#333" : "#222",
+                padding: "8px 15px",
+                borderRadius: "6px",
+                border: showOverlay ? "1px solid #007AFF" : "1px solid #444",
+                transition: "0.2s",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={showOverlay}
+                onChange={(e) => setShowOverlay(e.target.checked)}
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  cursor: "pointer",
+                  accentColor: "#007AFF",
+                }}
+              />
+              Blueprint Mode
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Canvas Container */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          borderRadius: "4px",
+          overflow: "hidden",
+          border: "2px solid #ff453a",
+        }}
+      >
+        {/* Floating Overlay Control Panel */}
+        {showOverlay && (
+          <div
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              backgroundColor: "rgba(20, 20, 20, 0.85)",
+              backdropFilter: "blur(8px)",
+              padding: "15px",
+              borderRadius: "8px",
+              border: "1px solid #444",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+              zIndex: 10,
+            }}
+          >
+            <h4 style={{ margin: 0, fontSize: "14px", color: "#aaa" }}>
+              Overlay Tools
+            </h4>
+
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "5px" }}
+            >
+              <label style={{ fontSize: "12px" }}>
+                Opacity: {Math.round(overlayOpacity * 100)}%
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.05"
+                value={overlayOpacity}
+                onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
+                style={{ width: "150px" }}
+              />
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "5px" }}
+            >
+              <label style={{ fontSize: "12px" }}>
+                Size: {Math.round(overlayScale * 100)}%
+              </label>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="range"
+                  min="50"
+                  max="200"
+                  step="1"
+                  value={Math.round(overlayScale * 100)}
+                  onChange={(e) =>
+                    setOverlayScale(parseFloat(e.target.value) / 100)
+                  }
+                  style={{ width: "110px" }}
+                />
+                <input
+                  type="number"
+                  min="50"
+                  max="200"
+                  step="1"
+                  value={Math.round(overlayScale * 100)}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val >= 50 && val <= 200) {
+                      setOverlayScale(val / 100);
+                    }
+                  }}
+                  style={{
+                    width: "55px",
+                    padding: "3px 6px",
+                    backgroundColor: "#222",
+                    color: "white",
+                    border: "1px solid #555",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                  }}
+                />
+                <span style={{ fontSize: "12px", color: "#aaa" }}>%</span>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "5px", marginTop: "5px" }}>
+              <button
+                onClick={() => setOverlayMode("move")}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  borderRadius: "4px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: overlayMode === "move" ? "#007AFF" : "#333",
+                  color: "white",
+                  transition: "0.2s",
+                }}
+              >
+                Move
+              </button>
+              <button
+                onClick={() => setOverlayMode("rotate")}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  borderRadius: "4px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor:
+                    overlayMode === "rotate" ? "#007AFF" : "#333",
+                  color: "white",
+                  transition: "0.2s",
+                }}
+              >
+                Rotate
+              </button>
+            </div>
+
+            <button
+              onClick={() => setOverlayMode("locked")}
+              style={{
+                width: "100%",
+                padding: "8px",
+                borderRadius: "4px",
+                border: "none",
+                fontWeight: "bold",
+                cursor: "pointer",
+                backgroundColor: overlayMode === "locked" ? "#34C759" : "#444",
+                color: "white",
+                transition: "0.2s",
+              }}
+            >
+              {overlayMode === "locked"
+                ? "Locked (Ready to Paint)"
+                : "Unlocked"}
+            </button>
+          </div>
+        )}
+
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: "100%",
+            aspectRatio: "16 / 9",
+            cursor:
+              isRotating || isDragging
+                ? "grabbing"
+                : overlayMode === "move" || overlayMode === "rotate"
+                  ? "grab"
+                  : actionView === "delete"
+                    ? "pointer"
+                    : mode === "paint"
+                      ? "crosshair"
+                      : "cell",
+            display: "block",
+            borderRadius: "4px",
+          }}
+          onMouseDown={handleCanvasMouseDown}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
+          onMouseLeave={handleCanvasMouseUp}
+        />
+      </div>
+    </div>
+  );
+}
+</file>
+
+</files>

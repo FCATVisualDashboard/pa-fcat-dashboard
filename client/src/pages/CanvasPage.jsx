@@ -1,428 +1,342 @@
 import { useEffect, useRef, useState } from "react";
 import jfkImg from "../assets/aerial.jpg";
-import '../navbar.css'
+import '../navbar.css';
 import API_BASE_URL from "../config";
 import { STATUS_COLORS } from "../colorMap";
 
+const STATUS_LABELS = {
+  OVERDUE:  "Overdue",
+  WASSGN:   "Unapproved",
+  APPR:     "Approved",
+  CONCL:    "Completed",
+  INACTIVE: "Inactive",
+};
+
+function StatusBadge({ status }) {
+  const color = STATUS_COLORS[status] || "#888";
+  return (
+    <span style={{
+      display: "inline-block", padding: "5px 14px", borderRadius: 20,
+      fontSize: 13, fontWeight: "bold",
+      backgroundColor: color + "22", color, border: `1px solid ${color}`,
+      letterSpacing: "0.5px",
+    }}>
+      {STATUS_LABELS[status] || status || "Unknown"}
+    </span>
+  );
+}
+
+function InfoRow({ label, value, valueColor }) {
+  return (
+    <div>
+      <div style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 15, color: valueColor || "#fff" }}>{value}</div>
+    </div>
+  );
+}
+
 function CanvasPage() {
   const canvasRef = useRef(null);
-  const imgRef = useRef(null);
-  const [dashboardData, setDashboardData] = useState({ cells: [], centers: [] });
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  // state for tooltip hover info
-  const [cellMap, setCellMap] = useState(new Map());
-  const [hoverInfo, setHoverInfo] = useState(null);
-
-  // state for slide-out sidebar
-  const [selectedZone, setSelectedZone] = useState(null);
+  const imgRef    = useRef(null);
+  const [dashboardData, setDashboardData] = useState({ cells: [], centers: [], work_orders: [] });
+  const [currentTime,   setCurrentTime]   = useState(new Date());
+  const [cellMap,       setCellMap]       = useState(new Map());
+  const [hoverInfo,     setHoverInfo]     = useState(null);
+  const [selectedZone,  setSelectedZone]  = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [workOrderMap,  setWorkOrderMap]  = useState(new Map());
+  const [compliance,    setCompliance]    = useState({ total: 0, completed: 0, overdue: 0 });
 
-  // update clock every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const lastRefreshed = "Today at 6:00 AM";
-  const complianceData = {
-    total: 24,
-    completed: 18,
-    approved: 3,
-    unapproved: 2,
-    overdue: 1,
-  };
-  const compliancePct = Math.round((complianceData.completed / complianceData.total) * 100);
-
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/dashboard`)
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
         setDashboardData(data);
 
         const map = new Map();
-        if (data.cells) {
-          data.cells.forEach(cell => {
-            map.set(`${cell.x_pos},${cell.y_pos}`, cell);
+        data.cells?.forEach(cell => map.set(`${cell.x_pos},${cell.y_pos}`, cell));
+        setCellMap(map);
+
+        const woMap = new Map();
+        data.work_orders?.forEach(wo => {
+          const score = wo.is_overdue ? 2 : wo.status !== 'CONCL' ? 1 : 0;
+          if (!woMap.has(wo.pm_id) || score > (woMap.get(wo.pm_id)._score || 0))
+            woMap.set(wo.pm_id, { ...wo, _score: score });
+        });
+        setWorkOrderMap(woMap);
+
+        if (data.work_orders?.length) {
+          setCompliance({
+            total:     data.work_orders.length,
+            completed: data.work_orders.filter(w => w.status === 'CONCL').length,
+            overdue:   data.work_orders.filter(w => w.is_overdue).length,
           });
         }
-        setCellMap(map);
       })
-
-      .catch(err => console.error("Failed to fetch dashboard data:", err))
+      .catch(err => console.error("Dashboard fetch failed:", err));
   }, []);
 
+  const compliancePct = compliance.total
+    ? Math.round((compliance.completed / compliance.total) * 100)
+    : null;
 
-  const CELL_SIZE = 4;
-  const COLS = 854;
-  const ROWS = 480;
+  const CELL_SIZE = 4, COLS = 854, ROWS = 480;
 
   const draw = (canvas, ctx, img, data) => {
-    if (!data || !data.cells || !data.centers){
-      return;
-    }
-
-    canvas.width = COLS * CELL_SIZE;
+    if (!data?.cells || !data?.centers) return;
+    canvas.width  = COLS * CELL_SIZE;
     canvas.height = ROWS * CELL_SIZE;
 
-    ctx.fillStyle = "#1e1e1e";
+    ctx.fillStyle = "#111";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-    const imgWidth = img.width * scale;
-    const imgHeight = img.height * scale;
-    const offsetX = (canvas.width - imgWidth) / 2;
-    const offsetY = (canvas.height - imgHeight) / 2;
+    ctx.drawImage(img, (canvas.width - img.width*scale)/2, (canvas.height - img.height*scale)/2, img.width*scale, img.height*scale);
 
-    ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
-
-    // draw colored grid cells per status
     data.cells.forEach(cell => {
-      const color = STATUS_COLORS[cell.status] || STATUS_COLORS.undefined;
-      ctx.fillStyle = color + "99";
-      ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      ctx.fillStyle = (STATUS_COLORS[cell.status] || STATUS_COLORS.undefined) + "99";
+      ctx.fillRect(cell.x_pos*CELL_SIZE, cell.y_pos*CELL_SIZE, CELL_SIZE, CELL_SIZE);
     });
 
-    // highlight the actively selected zone in white if the sidebar is open
     if (isSidebarOpen && selectedZone) {
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)"; // White highlight
+      ctx.fillStyle = "rgba(255,255,255,0.3)";
       data.cells.forEach(cell => {
-        if (cell.pm_id === selectedZone.pm_id) {
-          ctx.fillRect(cell.x_pos * CELL_SIZE, cell.y_pos * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        }
+        if (cell.pm_id === selectedZone.pm_id)
+          ctx.fillRect(cell.x_pos*CELL_SIZE, cell.y_pos*CELL_SIZE, CELL_SIZE, CELL_SIZE);
       });
     }
 
-    // draw grid lines
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 1;
-    for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-    }
-    for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-    }
+    for (let x = 0; x <= canvas.width;  x += CELL_SIZE) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+    for (let y = 0; y <= canvas.height; y += CELL_SIZE) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y);  ctx.stroke(); }
 
-    // draw labels over each zone center
     ctx.font = "bold 22px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
     data.centers.forEach(zone => {
-      const x = zone.center_x * CELL_SIZE;
-      const y = zone.center_y * CELL_SIZE;
-      const color = STATUS_COLORS[zone.status] || STATUS_COLORS.GRAY;
-
-      const textWidth = ctx.measureText(zone.description).width;
-      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-      ctx.beginPath();
-      ctx.roundRect(x - textWidth / 2 - 8, y - 14, textWidth + 16, 28, 6);
-      ctx.fill();
-
+      const x = zone.center_x * CELL_SIZE, y = zone.center_y * CELL_SIZE;
+      const color = STATUS_COLORS[zone.status] || "#888";
+      const tw = ctx.measureText(zone.description).width;
+      ctx.fillStyle = "rgba(0,0,0,0.75)";
+      ctx.beginPath(); ctx.roundRect(x - tw/2 - 8, y - 14, tw + 16, 28, 6); ctx.fill();
       ctx.fillStyle = color;
       ctx.fillText(zone.description, x, y);
     });
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const img = imgRef.current;
-    if (!canvas || !img) return;
-    const ctx = canvas.getContext("2d");
-    draw(canvas, ctx, img, dashboardData);
-  }, [dashboardData]);
+    const canvas = canvasRef.current, img = imgRef.current;
+    if (canvas && img) draw(canvas, canvas.getContext("2d"), img, dashboardData);
+  }, [dashboardData, isSidebarOpen, selectedZone]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
     const img = new Image();
     img.src = jfkImg;
-
-    img.onload = () => {
-      imgRef.current = img;
-      draw(canvas, ctx, img, dashboardData);
-    };
-
-    const handleResize = () => {
-      if (imgRef.current) draw(canvas, ctx, imgRef.current, dashboardData);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    img.onload = () => { imgRef.current = img; draw(canvas, ctx, img, dashboardData); };
+    const onResize = () => { if (imgRef.current) draw(canvas, ctx, imgRef.current, dashboardData); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  const getZoneData = (cellData) => ({ ...(workOrderMap.get(cellData.pm_id) || {}), ...cellData });
+
+  const toGridPos = (e, canvas) => {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: Math.floor((e.clientX - r.left)  * (canvas.width  / r.width)  / CELL_SIZE),
+      y: Math.floor((e.clientY - r.top)   * (canvas.height / r.height) / CELL_SIZE),
+    };
+  };
 
   const handleMouseMove = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    // convert mouse position to internal 4K canvas coordinates
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-
-    // snap to the nearest grid cell
-    const gridX = Math.floor(x / CELL_SIZE);
-    const gridY = Math.floor(y / CELL_SIZE);
-    
-    // check if we have data for this specific grid coordinate
-    const cellData = cellMap.get(`${gridX},${gridY}`);
-
-    if (cellData) {
-      // offset the tooltip slightly so it doesn't get covered by the cursor
-      setHoverInfo({
-        x: e.clientX + 15,
-        y: e.clientY + 15,
-        data: cellData
-      });
-    } else {
-      // clear the tooltip if hovering over an empty part of the map
-      setHoverInfo(null);
-    }
+    const { x, y } = toGridPos(e, canvas);
+    const cell = cellMap.get(`${x},${y}`);
+    setHoverInfo(cell ? { x: e.clientX + 16, y: e.clientY + 16, data: getZoneData(cell) } : null);
   };
 
-  // click handler to open/close sidebar
   const handleCanvasClick = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-
-    const gridX = Math.floor(x / CELL_SIZE);
-    const gridY = Math.floor(y / CELL_SIZE);
-    
-    const cellData = cellMap.get(`${gridX},${gridY}`);
-
-    if (cellData) {
-      // if clicked a zone, open the sidebar and clear the hover tooltip
-      setSelectedZone(cellData);
-      setIsSidebarOpen(true);
-      setHoverInfo(null); 
-    } else {
-      // if clicked empty space, close the sidebar
-      setIsSidebarOpen(false);
-      setSelectedZone(null);
-    }
+    const { x, y } = toGridPos(e, canvas);
+    const cell = cellMap.get(`${x},${y}`);
+    if (cell) { setSelectedZone(getZoneData(cell)); setIsSidebarOpen(true); setHoverInfo(null); }
+    else       { setIsSidebarOpen(false); setSelectedZone(null); }
   };
 
-  return (
-    <div style={{
-  background: 'linear-gradient(to top, #0b0b0b, #333232)',
-  width: '100vw',
-  minHeight: '100vh',    
-  margin: 0,
-  padding: 0,
-  display: 'flex',         
-  flexDirection: 'column', 
-  boxSizing: 'border-box',  
-  overflow: 'auto'          
-}}>
+  const fmtDate = (d) => d
+    ? new Date(d).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
 
-      <div style={{
-  backgroundColor: "#1a1a1a",
-  borderBottom: "2px solid #eeff00",
-  flexShrink: 0,
-  height: "50px",
-}}>
-  <nav className="navbar" role="navigation">
-    <div className="navbar-left">
-      <a href="/">JFK FCAT PM Dashboard</a>
-    </div>
-    <div className="navbar-center">
-      <ul>
-        <li>
-          <span className="navbar-stat">
-            <span className="navbar-stat-label">Last Refreshed:</span>
-            <span className="navbar-stat-value">{lastRefreshed}</span>
-          </span>
-        </li>
-        <li>
-          <span className="navbar-stat">
-            <span className="navbar-stat-label">Compliance:</span>
-            <span className="navbar-stat-value" style={{ color: compliancePct >= 80 ? '#34C759' : compliancePct >= 50 ? '#FF9F0A' : '#FF3B30' }}>
-              {compliancePct}%
+  return (
+<div style={{ background: "linear-gradient(to top, #0b0b0b, #1a1a1a)", width: "100vw", minHeight: "100vh", display: "flex", flexDirection: "column", boxSizing: "border-box", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      {/* Navbar */}
+      <div style={{ backgroundColor: "#1a1a1a", borderBottom: "2px solid #eeff00", flexShrink: 0, height: 50 }}>
+        <nav className="navbar" role="navigation">
+          <div className="navbar-left"><a href="/">Maximo FCAT PM Dashboard</a></div>
+          <div className="navbar-center">
+            <ul>
+              <li><a href="/canvas" style={{ color: "#eeff00" }}>Map View</a></li>
+              <li><a href="/workorders">Work Orders</a></li>
+            </ul>
+          </div>
+          <div className="navbar-right">
+            {compliancePct !== null && (
+              <span className="navbar-stat" style={{ marginRight: 20 }}>
+                <span className="navbar-stat-label">Compliance:</span>
+                <span className="navbar-stat-value" style={{ color: compliancePct >= 80 ? '#34C759' : compliancePct >= 50 ? '#FF9F0A' : '#FF3B30' }}>
+                  {compliancePct}%
+                </span>
+              </span>
+            )}
+            {compliance.overdue > 0 && (
+              <span className="navbar-stat" style={{ marginRight: 20 }}>
+                <span className="navbar-stat-label">Overdue:</span>
+                <span className="navbar-stat-value" style={{ color: "#FF3B30" }}>{compliance.overdue}</span>
+              </span>
+            )}
+            <span className="navbar-stat">
+              <span className="navbar-stat-label">{currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+              <span className="navbar-stat-value">{currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             </span>
-          </span>
-        </li>
-        {/* <li>
-          <span className="navbar-stat">
-            <span className="navbar-stat-label">Overdue:</span>
-            <span className="navbar-stat-value" style={{ color: complianceData.overdue > 0 ? '#FF3B30' : '#34C759' }}>
-              {complianceData.overdue}
-            </span>
-          </span>
-        </li> */}
-      </ul>
-    </div>
-    <div className="navbar-right">
-      <span className="navbar-stat">
-        <span className="navbar-stat-label">
-          {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-        </span>
-        <span className="navbar-stat-value">
-          {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-        </span>
-      </span>
-    </div>
-  </nav>
-</div>
-      {/* Main Content Area (Canvas + Sidebar) */}
-      <div style={{ flex: 1, position: "relative", display: "flex" }}>
-        
-        {/* Canvas Container */}
-        <div style={{ flex: 1, padding: "20px", transition: "padding-right 0.3s ease" }}>
+          </div>
+        </nav>
+      </div>
+
+      {/* Main */}
+      <div style={{ flex: 1, position: "relative", display: "flex", overflow: "hidden" }}>
+
+        {/* Canvas area */}
+        <div style={{ flex: 1, padding: 20 }}>
           <canvas
             ref={canvasRef}
-            style={{
-              display: "block",
-              width: "100%",
-              aspectRatio: "16 / 9",
-              border: "2px solid #ff453a",
-              cursor: hoverInfo ? "pointer" : "crosshair"
-            }}
+            style={{ display: "block", width: "100%", aspectRatio: "16/9", border: "1px solid #2a2a2a", borderRadius: 8, cursor: hoverInfo ? "zoom-in" : "default" }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setHoverInfo(null)}
-            onClick={handleCanvasClick} 
+            onClick={handleCanvasClick}
           />
+          {/* Legend */}
+          <div style={{ display: "flex", gap: 16, marginTop: 12, flexWrap: "wrap" }}>
+            {Object.entries(STATUS_LABELS).map(([key, label]) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#666" }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: STATUS_COLORS[key] }} />
+                {label}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Slide-Out Sidebar */}
+        {/* Sidebar */}
         <div style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: "400px",
-          backgroundColor: "rgba(20, 20, 20, 0.98)",
-          borderLeft: "1px solid #333",
-          boxShadow: "-5px 0 25px rgba(0,0,0,0.7)", 
-          transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)", 
-          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)", 
-          zIndex: 100,
-          display: "flex",
-          flexDirection: "column",
-          color: "white"
+          position: "absolute", top: 0, right: 0, bottom: 0, width: 380,
+          backgroundColor: "#111", borderLeft: "1px solid #222",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.7)",
+          transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+          zIndex: 100, display: "flex", flexDirection: "column", color: "#fff",
         }}>
-          
-          {selectedZone && (
+          {selectedZone ? (
             <>
-              {/* Sidebar Header */}
-              <div style={{ 
-                display: "flex", 
-                justifyContent: "space-between", 
-                alignItems: "center", 
-                padding: "20px", 
-                borderBottom: "1px solid #333",
-                backgroundColor: "#1a1a1a"
-              }}>
-                <h2 style={{ margin: 0, fontSize: "20px" }}>{selectedZone.pm_id}</h2>
-                <button 
-                  onClick={() => setIsSidebarOpen(false)}
-                  style={{ 
-                    background: "none", border: "none", color: "#888", fontSize: "28px", 
-                    cursor: "pointer", padding: "0 5px", lineHeight: "1" 
-                  }}
-                >
-                  &times;
-                </button>
+              {/* Header */}
+              <div style={{ padding: "18px 20px", borderBottom: "1px solid #1e1e1e", backgroundColor: "#1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 11, color: "#555", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 4 }}>Zone</div>
+                  <div style={{ fontSize: 22, fontWeight: "bold" }}>{selectedZone.description || selectedZone.pm_id}</div>
+                  {selectedZone.description && <div style={{ fontSize: 12, color: "#444", marginTop: 3 }}>PM ID: {selectedZone.pm_id}</div>}
+                </div>
+                <button onClick={() => { setIsSidebarOpen(false); setSelectedZone(null); }}
+                  style={{ background: "none", border: "none", color: "#444", fontSize: 26, cursor: "pointer", lineHeight: 1, padding: "0 0 0 12px", marginTop: 2 }}
+                  onMouseEnter={e => e.currentTarget.style.color = "#aaa"}
+                  onMouseLeave={e => e.currentTarget.style.color = "#444"}
+                >&times;</button>
               </div>
 
-              {/* Sidebar Scrollable Body */}
-              <div style={{ padding: "25px 20px", flex: 1, overflowY: "auto" }}>
-                
-                {/* Status Badge */}
-                <div style={{ marginBottom: "30px" }}>
-                  <span style={{ 
-                    display: "inline-block",
-                    padding: "6px 12px", 
-                    borderRadius: "20px", 
-                    backgroundColor: (STATUS_COLORS[selectedZone.status] || '#555') + "33", 
-                    color: STATUS_COLORS[selectedZone.status] || '#fff',
-                    border: `1px solid ${STATUS_COLORS[selectedZone.status] || '#555'}`,
-                    fontWeight: "bold",
-                    fontSize: "14px"
-                  }}>
-                    {selectedZone.status || 'STATUS UNKNOWN'}
-                  </span>
+              {/* Body */}
+              <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
+                <div style={{ marginBottom: 22 }}>
+                  <StatusBadge status={selectedZone.status} />
                 </div>
 
-                {/* Detailed Data Rows */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  <div>
-                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Description</label>
-                    <div style={{ fontSize: "16px", marginTop: "4px" }}>{selectedZone.description || 'No description provided.'}</div>
-                  </div>
-
-                  <div>
-                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Target Start Date</label>
-                    <div style={{ fontSize: "16px", marginTop: "4px" }}>
-                      {selectedZone.target_start_date ? new Date(selectedZone.target_start_date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Unscheduled'}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Maintenance Frequency</label>
-                    <div style={{ fontSize: "16px", marginTop: "4px" }}>{selectedZone.frequency || 'N/A'}</div>
-                  </div>
-
-                  {/* Placeholder for future expansion (e.g. Notes, Action Buttons) */}
-                  <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #333" }}>
-                    <label style={{ color: "#888", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Actions</label>
-                    <button style={{ 
-                      width: "100%", marginTop: "10px", padding: "10px", 
-                      backgroundColor: "#007AFF", color: "white", border: "none", 
-                      borderRadius: "6px", cursor: "pointer", fontWeight: "bold" 
-                    }}>
-                      Update Work Order
-                    </button>
-                  </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                  {selectedZone.work_order_id && (
+                    <InfoRow label="Work Order ID" value={selectedZone.work_order_id} valueColor="#eeff00" />
+                  )}
+                  <InfoRow
+                    label="Target Start Date"
+                    value={fmtDate(selectedZone.target_start_date) || <span style={{ color: "#444" }}>Unscheduled</span>}
+                    valueColor={selectedZone.status === 'OVERDUE' ? '#FF3B30' : undefined}
+                  />
+                  <InfoRow
+                    label="Frequency"
+                    value={selectedZone.frequency || <span style={{ color: "#444" }}>N/A</span>}
+                  />
                 </div>
+
+                <div style={{ borderTop: "1px solid #1e1e1e", margin: "22px 0" }} />
+
+                <a href="/workorders" style={{
+                  display: "block", textAlign: "center", padding: "10px",
+                  backgroundColor: "#007AFF15", color: "#007AFF",
+                  border: "1px solid #007AFF44", borderRadius: 6,
+                  textDecoration: "none", fontWeight: "bold", fontSize: 14,
+                }}>
+                  View All Work Orders →
+                </a>
+              </div>
+
+              {/* Footer — Admin tucked here */}
+              <div style={{ padding: "10px 20px", borderTop: "1px solid #1a1a1a", display: "flex", justifyContent: "flex-end" }}>
+                <a href="/admin"
+                  style={{ color: "#2a2a2a", fontSize: 12, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}
+                  onMouseEnter={e => e.currentTarget.style.color = "#555"}
+                  onMouseLeave={e => e.currentTarget.style.color = "#2a2a2a"}
+                >
+                  ⚙ Admin Mapper
+                </a>
               </div>
             </>
+          ) : (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#333", fontSize: 14 }}>
+              Click a zone on the map
+            </div>
           )}
         </div>
       </div>
 
-      {/* Floating Tooltip (Only renders if sidebar is closed) */}
-      {!isSidebarOpen && hoverInfo && hoverInfo.data && (
+      {/* Hover tooltip */}
+      {!isSidebarOpen && hoverInfo?.data && (
         <div style={{
-          position: "fixed",
-          left: hoverInfo.x,
-          top: hoverInfo.y,
-          backgroundColor: "rgba(20, 20, 20, 0.75)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
-          border: `1px solid ${STATUS_COLORS[hoverInfo.data.status] || '#555'}`,
-          borderRadius: "8px",
-          padding: "12px 16px",
-          color: "#fff",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-          pointerEvents: "none",
-          zIndex: 1000,
-          minWidth: "200px"
+          position: "fixed", left: hoverInfo.x, top: hoverInfo.y,
+          backgroundColor: "rgba(12,12,12,0.94)", backdropFilter: "blur(8px)",
+          border: `1px solid ${STATUS_COLORS[hoverInfo.data.status] || '#2a2a2a'}`,
+          borderRadius: 8, padding: "10px 14px", color: "#fff",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.7)", pointerEvents: "none", zIndex: 1000, minWidth: 200,
         }}>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: "16px", borderBottom: "1px solid #444", paddingBottom: "6px" }}>
-            {hoverInfo.data.pm_id}
-          </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#aaa" }}>Status:</span>
-              <span style={{ fontWeight: "bold", color: STATUS_COLORS[hoverInfo.data.status] || '#fff' }}>
-                {hoverInfo.data.status || 'N/A'}
+          <div style={{ fontWeight: "bold", fontSize: 14, marginBottom: 6, borderBottom: "1px solid #1e1e1e", paddingBottom: 5 }}>
+            {hoverInfo.data.description || hoverInfo.data.pm_id}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+              <span style={{ color: "#555" }}>Status</span>
+              <span style={{ fontWeight: "bold", color: STATUS_COLORS[hoverInfo.data.status] || "#fff" }}>
+                {STATUS_LABELS[hoverInfo.data.status] || hoverInfo.data.status || "—"}
               </span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#aaa" }}>Due Date:</span>
-              <span>
-                {hoverInfo.data.target_start_date ? new Date(hoverInfo.data.target_start_date).toLocaleDateString() : 'Unscheduled'}
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+              <span style={{ color: "#555" }}>Due Date</span>
+              <span style={{ color: hoverInfo.data.status === 'OVERDUE' ? '#FF3B30' : '#ccc' }}>
+                {hoverInfo.data.target_start_date
+                  ? new Date(hoverInfo.data.target_start_date).toLocaleDateString()
+                  : <span style={{ color: "#333" }}>—</span>}
               </span>
             </div>
           </div>
