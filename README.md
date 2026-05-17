@@ -1,86 +1,181 @@
-# JFK FCAT PM Visualization Dashboard
+# JFK Maximo FCAT PM Visualization Dashboard
 
-A full-stack web application designed for the Port Authority of New York and New Jersey to track and manage Preventative Maintenance (PM) zones at JFK airport. It features a custom HTML5 Canvas rendering engine for interactive, spatial data visualization.
+Interactive full-stack operational dashboard for monitoring FAA preventive maintenance (FCAT PM) compliance across JFK Airport airfield infrastructure.
 
-##  Key Features
-- **Interactive Map Engine:** Custom-built HTML5 Canvas interface for viewing and interacting with airfield PM zones.
-- **Auto-Fill Tracing Tool:** Built-in admin mapping tool utilizing ray-casting and Bresenham's line algorithms to trace and auto-fill complex polygons.
-- **Dynamic UI:** Slide-out sidebars and hover tooltips for granular zone data without cluttering the map.
-- **RESTful API:** Node.js/Express backend handling spatial data translation and database transactions.
+The system visualizes preventive maintenance status for runways, taxiways, and connector zones using a high-performance spatial matrix rendered directly over an aerial basemap. Work order states are aggregated using a strict **worst-case severity model** to ensure unresolved maintenance conditions remain visible.
 
 ---
 
-## Prerequisites
-- **Node.js (v22.12.0+)**: *Strict requirement for Vite 6+ and backend native watch mode.*
-- **PostgreSQL**: Installed locally with pgAdmin for database management.
-- **Git**
+# System Architecture
 
----
+Due to early environment and sandbox limitations, ingestion was implemented using a flexible Excel upload pipeline instead of direct Maximo API integration.
 
-## Installation
+The application is built around a fully decoupled **Normalization Layer**. Database models, business rules, and frontend rendering logic remain independent from the upstream data source.
 
-Clone the repository and install dependencies for both the client and server environments.
+This design makes the platform **API-ready** — migrating from spreadsheet uploads to direct Maximo OSLC endpoints requires no downstream database or visualization changes.
 
-```bash
-# 1. Clone the repo
-git clone [https://github.com/FCATVisualDashboard/pa-fcat-dashboard.git](https://github.com/FCATVisualDashboard/pa-fcat-dashboard.git)
-cd pa-fcat-dashboard
-
-# 2. Install backend dependencies
-cd server
-npm install
-
-# 3. Install frontend dependencies
-cd ../client
-npm install
-npm install @neondatabase/serverless
+```text
+Daily Maximo Export
+        │
+        ▼
+┌─────────────────────────────────────┐
+│     Node.js Ingestion Layer         │
+│                                     │
+│  • Flexible column mapping          │
+│  • Regex bracket parsing            │
+│  • Data normalization               │
+│                                     │
+│  (Swappable with Maximo OSLC API)   │
+└────────────────┬────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────┐
+│      PostgreSQL Database (Neon)     │
+│                                     │
+│  • Relational storage               │
+│  • Worst-case status rollups        │
+└────────────────┬────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────┐
+│        React Canvas Frontend        │
+│                                     │
+│  • 854 × 480 matrix renderer        │
+│  • Interactive information panel    │
+│  • Large display optimization       │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## 🗄️ Backend & Database Setup
+# Technical Stack
 
-### 1. Environment Variables
-Create a `.env` file inside the `server/` folder. Use this unified connection string format:
+## Frontend (`/client`)
+
+- **Framework:** React 19 (Vite)
+- **Routing:** React Router DOM v7
+- **Rendering Engine:** HTML5 `<canvas>`
+- **Visualization Model:** 854 × 480 coordinate matrix
+- **Performance Target:** Smooth rendering across 410,000+ coordinate intersections
+- **Deployment:** Vercel
+
+## Backend (`/server`)
+
+- **Runtime:** Node.js + Express
+- **Upload Handling:** Multer memory storage
+- **Workbook Processing:** SheetJS (`xlsx`)
+- **Database Driver:** `@neondatabase/serverless`
+- **Testing:** Jest + Supertest
+
+---
+
+# Database Schema
+
+Core relational model:
+
+```sql
+CREATE TABLE areas (
+    pm_id VARCHAR(50) PRIMARY KEY,
+    description VARCHAR(255)
+);
+
+CREATE TABLE grid (
+    id SERIAL PRIMARY KEY,
+    x_pos INTEGER,
+    y_pos INTEGER,
+    pm_id VARCHAR(50) REFERENCES areas(pm_id),
+    UNIQUE (pm_id, x_pos, y_pos)
+);
+
+CREATE TABLE work_order (
+    work_order_id VARCHAR(50) PRIMARY KEY,
+    pm_id VARCHAR(50) REFERENCES areas(pm_id),
+    status VARCHAR(50),
+    target_start_date TIMESTAMP,
+    frequency VARCHAR(50),
+    description VARCHAR(255)
+);
+```
+
+---
+
+# Worst-Case Severity Aggregation Logic
+
+When multiple active work orders exist within the same maintenance zone, the backend elevates the **highest-severity operational status** to determine the final visualization color.
+
+This prevents completed or low-priority items from masking unresolved maintenance conditions.
+
+| Priority | Status | Color | Evaluation Rule |
+|----------|----------|----------|----------|
+| 1 | Overdue | 🔴 Red | `status <> 'CONCL' AND target_start_date < NOW()` |
+| 2 | Unapproved | 🟡 Yellow | `status = 'WASSGN' OR status = 'WASSGND'` |
+| 3 | Approved | 🟠 Orange | `status = 'APPR'` |
+| 4 | Completed | 🟢 Green | All related records evaluate to `CONCL` |
+| Default | Inactive / Unmapped | ⚪ Gray | No matching current work orders |
+
+---
+
+# Local Development Setup
+
+## Backend Configuration
+
+Install backend dependencies:
+
+```bash
+cd server
+npm install
+```
+
+Create `/server/.env`:
 
 ```env
 PORT=5001
-NODE_ENV=development
-DATABASE_URL=postgres://YOUR_POSTGRES_USERNAME:YOUR_POSTGRES_PASSWORD@localhost:5432/jfk_fcat
+DATABASE_URL=postgres://<your-neon-connection-string>?sslmode=require
 ```
-*(Make sure to replace the username and password with your actual local pgAdmin credentials).*
 
-### 2. Database Setup
-Run SQL file in pgAdmin using the Query Tool to initialize your local database:
- `server/database/db.sql` — creates the necessary tables.
+Start the backend:
+
+```bash
+npm run dev
+```
 
 ---
 
-## 💻 Running Locally
+## Frontend Configuration
 
-The project requires two concurrent terminal sessions to run the frontend and backend simultaneously.
+Install frontend dependencies:
 
-**1. Start the Backend API**
-```bash
-cd server
-npm run dev
-```
-*Runs on `http://localhost:5001` with native Node watch-mode hot-reloading.*
-
-**2. Start the Frontend UI**
 ```bash
 cd client
+npm install
+```
+
+Create `/client/.env`:
+
+```env
+VITE_API_URL=http://localhost:5001
+```
+
+Start the frontend:
+
+```bash
 npm run dev
 ```
-*Runs on `http://localhost:5173` with Vite Hot Module Replacement (HMR).*
+
+Application URL:
+
+```text
+http://localhost:5173
+```
 
 ---
 
-## 🧪 Testing
+# Test Execution
 
-The backend is fully equipped with an isolated integration testing suite using **Jest** and **Supertest**. The tests intercept database calls using a mock connection pool, ensuring your actual database is never mutated during test runs.
+Backend integration tests run against mocked environments to avoid production database modification.
 
-To run the backend test suite:
+Run tests:
+
 ```bash
 cd server
 npm test
@@ -88,8 +183,100 @@ npm test
 
 ---
 
-## 📂 Project Structure
+# Operational Handoff Guide
 
-- `/client`: React frontend (Vite, HTML5 Canvas engine, interactive UI components).
-- `/server`: Node.js/Express backend (REST API endpoints, PostgreSQL integration, Jest testing suite).
+## 1. Ingestion Strategy
+
+### Flexible Column Matching
+
+Excel parsing uses a normalized alias mapping system (`COLUMN_ALIASES`).
+
+Headers such as:
+
+```text
+duedate
+scheduledstart
+targetstartdate
 ```
+
+are automatically mapped to:
+
+```text
+target_start_date
+```
+
+without requiring exact column naming.
+
+### Bracket Parsing Logic
+
+Maximo exports often contain encoded PM labels rather than directly usable zone identifiers.
+
+The ingestion layer:
+
+1. Scans source text fields
+2. Applies regex bracket extraction
+3. Detects values such as:
+
+```text
+[TW-19]
+```
+
+4. Extracts the trailing segment after the final dash
+5. Uses the parsed value to establish relational mapping inside the database
+
+---
+
+## 2. Admin Calibration Tool (`/admin`)
+
+The visualization operates on an **854 × 480 coordinate matrix**.
+
+Blueprint Mode overlays engineering drawings directly over the satellite basemap for calibration and zone editing.
+
+### Calibration Workflow
+
+- Enable **Blueprint Mode**
+- Align geometry using **Move** and **Rotate** controls
+- Select **Lock Position & Draw**
+- Trace maintenance zones onto the calibrated canvas
+
+### Canvas Shortcuts
+
+| Shortcut | Action |
+|----------|----------|
+| `P` | Paint mode |
+| `E` | Erase mode |
+| `Ctrl + Z` | Undo |
+| `Ctrl + Y` | Redo |
+
+---
+
+## 3. Migrating to Direct Maximo API Integration
+
+To replace manual spreadsheet uploads with live enterprise data feeds:
+
+Navigate to:
+
+```text
+server/controllers/workOrderController.js
+```
+
+Replace the spreadsheet ingestion routine with direct Maximo OSLC requests.
+
+Example implementation:
+
+```javascript
+const response = await fetch(
+  'https://<maximo-host>/oslc/os/mxworkorder?oslc.where=jobplan="TORQUE_CLEAN"&oslc.pageSize=500',
+  {
+    headers: {
+      apikey: process.env.MAXIMO_API_KEY
+    }
+  }
+);
+
+const apiPayload = await response.json();
+```
+
+Map the API response into the existing normalized record structure.
+
+No frontend, database schema, or visualization changes are required after migration.
