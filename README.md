@@ -6,7 +6,7 @@ The system visualizes preventive maintenance status for runways, taxiways, and c
 
 ---
 
-# System Architecture
+## System Architecture
 
 Due to early environment and sandbox limitations, ingestion was implemented using a flexible Excel upload pipeline instead of direct Maximo API integration.
 
@@ -48,9 +48,9 @@ Daily Maximo Export
 
 ---
 
-# Technical Stack
+## Technical Stack
 
-## Frontend (`/client`)
+### Frontend (`/client`)
 
 - **Framework:** React 19 (Vite)
 - **Routing:** React Router DOM v7
@@ -59,7 +59,7 @@ Daily Maximo Export
 - **Performance Target:** Smooth rendering across 410,000+ coordinate intersections
 - **Deployment:** Vercel
 
-## Backend (`/server`)
+### Backend (`/server`)
 
 - **Runtime:** Node.js + Express
 - **Upload Handling:** Multer memory storage
@@ -69,7 +69,7 @@ Daily Maximo Export
 
 ---
 
-# Database Schema
+## Database Schema
 
 Core relational model:
 
@@ -99,7 +99,7 @@ CREATE TABLE work_order (
 
 ---
 
-# Worst-Case Severity Aggregation Logic
+## Worst-Case Severity Aggregation Logic
 
 When multiple active work orders exist within the same maintenance zone, the backend elevates the **highest-severity operational status** to determine the final visualization color.
 
@@ -115,9 +115,9 @@ This prevents completed or low-priority items from masking unresolved maintenanc
 
 ---
 
-# Local Development Setup
+## Local Development Setup
 
-## Backend Configuration
+### Backend Configuration
 
 Install backend dependencies:
 
@@ -141,7 +141,7 @@ npm run dev
 
 ---
 
-## Frontend Configuration
+### Frontend Configuration
 
 Install frontend dependencies:
 
@@ -170,7 +170,7 @@ http://localhost:5173
 
 ---
 
-# Test Execution
+## Test Execution
 
 Backend integration tests run against mocked environments to avoid production database modification.
 
@@ -183,11 +183,11 @@ npm test
 
 ---
 
-# Operational Handoff Guide
+## Operational Handoff Guide
 
-## 1. Ingestion Strategy
+### 1. Ingestion Strategy
 
-### Flexible Column Matching
+#### Flexible Column Matching
 
 Excel parsing uses a normalized alias mapping system (`COLUMN_ALIASES`).
 
@@ -207,7 +207,7 @@ target_start_date
 
 without requiring exact column naming.
 
-### Bracket Parsing Logic
+#### Bracket Parsing Logic
 
 Maximo exports often contain encoded PM labels rather than directly usable zone identifiers.
 
@@ -226,20 +226,20 @@ The ingestion layer:
 
 ---
 
-## 2. Admin Calibration Tool (`/admin`)
+### 2. Admin Calibration Tool (`/admin`)
 
 The visualization operates on an **854 × 480 coordinate matrix**.
 
 Blueprint Mode overlays engineering drawings directly over the satellite basemap for calibration and zone editing.
 
-### Calibration Workflow
+#### Calibration Workflow
 
 - Enable **Blueprint Mode**
 - Align geometry using **Move** and **Rotate** controls
 - Select **Lock Position & Draw**
 - Trace maintenance zones onto the calibrated canvas
 
-### Canvas Shortcuts
+#### Canvas Shortcuts
 
 | Shortcut | Action |
 |----------|----------|
@@ -250,7 +250,36 @@ Blueprint Mode overlays engineering drawings directly over the satellite basemap
 
 ---
 
-## 3. Migrating to Direct Maximo API Integration
+### 3. Database Seeding & Map Data Preservation
+
+Because airport surfaces are irregularly shaped, geometric zone coordinates cannot be computed dynamically; they must be generated via the manual drawing canvas.
+
+Historical geometry coordinates have been exported from the production database and committed as seed files.
+
+> ⚠️ **CRITICAL:** Do not skip this configuration sequence on clean-slate deployments. Omitting these tables will result in an entirely blank airfield visual map.
+
+Seed files are tracked directly inside the repository at:
+
+- `server/database/areas.csv` — PM zone labels and baseline descriptions
+- `server/database/grid.csv` — Coordinate entries mapping pixel clusters to parent area keys
+
+#### Import Sequence via Neon Console
+
+1. Execute the queries inside `server/database/db.sql`.
+2. Open the **SQL Editor** or import wizard.
+3. Import `areas.csv` into the **areas** table first (**required for foreign key dependencies**).
+4. Import `grid.csv` into the **grid** table second.
+
+If restoring geometry seeds via PostgreSQL shell:
+
+```sql
+\copy areas FROM 'server/database/areas.csv' DELIMITER ',' CSV HEADER;
+\copy grid FROM 'server/database/grid.csv' DELIMITER ',' CSV HEADER;
+```
+
+---
+
+### 4. Migrating to Direct Maximo API Integration
 
 To replace manual spreadsheet uploads with live enterprise data feeds:
 
@@ -277,6 +306,6 @@ const response = await fetch(
 const apiPayload = await response.json();
 ```
 
-Map the API response into the existing normalized record structure.
+Map the API payload into the existing normalized ingestion record format.
 
 No frontend, database schema, or visualization changes are required after migration.
